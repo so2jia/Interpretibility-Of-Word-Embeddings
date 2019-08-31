@@ -15,6 +15,7 @@ logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
 
+
 class Embedding(object):
     """
     This class provides utils for efficient storage and manipulation of sparse (embedding) matrices.
@@ -22,12 +23,49 @@ class Embedding(object):
     """
     
     def __init__(self, embedding_path, dense_input, words_to_keep=None, max_words=-1):
+        """
+        Parameters
+        ----------
+        embedding_path : str
+            Location of the embedding
+        dense_input : bool
+            Marks if it is a dense embedding
+        words_to_keep : list, optional
+            list of words to keep
+        max_words : int, optional
+            Indicates the number of lines to read in.
+            If negative, the entire file gets processed.
+        """
         if dense_input:
-            self.w2i, self.i2w, self.W =  self.load_dense_embeddings(embedding_path, words_to_keep=words_to_keep, max_words=max_words)
+            self.w2i, self.i2w, self.W = self.load_dense_embeddings(embedding_path, words_to_keep=words_to_keep, max_words=max_words)
         else:
-            self.w2i, self.i2w, self.W =  self.load_sparse_embeddings(embedding_path, words_to_keep=words_to_keep, max_words=max_words)
+            self.w2i, self.i2w, self.W = self.load_sparse_embeddings(embedding_path, words_to_keep=words_to_keep, max_words=max_words)
 
-    def load_dense_embeddings(self, path, words_to_keep=None, max_words=-1):
+    @staticmethod
+    def load_dense_embeddings(path: str, words_to_keep=None, max_words=-1):
+        """
+        Reads in the dense embedding file.
+
+        Parameters
+        ----------
+        path : str
+            Location of the gzipped dense embedding file
+            If None, no filtering takes place.
+        words_to_keep : list, optional
+            list of words to keep
+        max_words : int, optional
+            Indicates the number of lines to read in.
+            If negative, the entire file gets processed.
+        Returns
+        -------
+        tuple:
+            w2i:
+                Wordform to identifier dictionary,
+            i2w:
+                Identifier to wordform dictionary,
+            W:
+                The dense embedding matrix
+        """
         if path.endswith('.gz'):
             lines = gzip.open(path, 'rt')
         elif path.endswith('.zip'):
@@ -55,25 +93,35 @@ class Embedding(object):
                     words.append(tokens[0])
             except:
                 print('Error while parsing input line #{}: {}'.format(counter, line))
+
         i2w = dict(enumerate(words))
-        w2i = {v:k for k,v in i2w.items()}
+        w2i = {v: k for k, v in i2w.items()}
         return w2i, i2w, np.array(data)
 
-
-    def load_sparse_embeddings(self, path, words_to_keep=None, max_words=-1):
+    @staticmethod
+    def load_sparse_embeddings(path, words_to_keep=None, max_words=-1):
         """
         Reads in the sparse embedding file.
+
         Parameters
         ----------
-        path : location of the gzipped sparse embedding file
-        If None, no filtering takes plce.
-        max_words : indicates the number of lines to read in.
-        If negative, the entire file gets processed.
+        path : str
+            Location of the gzipped sparse embedding file
+            If None, no filtering takes place.
+        words_to_keep : list, optional
+            list of words to keep
+        max_words : int, optional
+            Indicates the number of lines to read in.
+            If negative, the entire file gets processed.
         Returns
         -------
-        w2i : wordform to identifier dictionary
-        i2w : identifier to wordform dictionary
-        W : the sparse embedding matrix
+        tuple:
+            w2i:
+                Wordform to identifier dictionary,
+            i2w:
+                Identifier to wordform dictionary,
+            W:
+                The sparse embedding matrix
         """
 
         i2w = {}
@@ -102,16 +150,16 @@ class Embedding(object):
         return w2i, i2w, sp.csr_matrix((data, indices, indptr), shape=(len(indptr)-1, i+1))
 
     def query_by_index(self, idx, top_words=25000, top_k=10):
-        assert type(self.W) == sp.csr_matrix ## this method only works for sparse matrices at the moment
+        assert type(self.W) == sp.csr_matrix  # this method only works for sparse matrices at the moment
         relative_scores = []
         word_ids = []
         for wid, we in enumerate(self.W):
-            if wid==top_words:
+            if wid == top_words:
                 break
             if idx in we.indices:
                 s = np.sum(we.data)
-                for i,d in zip(we.indices, we.data):
-                    if i==idx:
+                for i, d in zip(we.indices, we.data):
+                    if i == idx:
                         relative_scores.append(d / s)
                         word_ids.append(wid)
                         break
@@ -119,8 +167,75 @@ class Embedding(object):
         if top_k > 0: order = order[-top_k:]
         return [(self.i2w[word_ids[j]], relative_scores[j], word_ids[j]) for j in order]
 
-def main():
 
+def _constructing_mcrae_features(mcrae_dir: str):
+    """
+    Creating feature dictionary
+
+    Parameters
+    ----------
+    mcrae_dir: str
+        Path to the McRae file
+
+    Returns
+    -------
+    dict:
+        Concept-Index dictionary
+    """
+    c2i = {}
+
+    # Iterating over the lines of the file
+    for i, l in enumerate(open('{}/McRae-BRM-InPress/CONCS_FEATS_concstats_brm.txt'.format(mcrae_dir))):
+        # Skipping column labels
+        if i == 0:
+            continue
+        # Split it into columns
+        parts = l.split()
+        # Creating Concept-Index pairs
+        if parts[0] not in c2i:
+            c2i[parts[0]] = len(c2i)
+    return c2i
+
+
+def read(input_file: str, dense_file: bool, lines_to_read=-1, mcrae_dir=None, mcrae_words_only=None):
+    """
+    Reads embedding file
+    Parameters
+    ----------
+        input_file : str
+            Path to the input file.
+        dense_file : bool
+            True if it marks a dense embedding, false otherwise.
+        lines_to_read : int, optional
+            Indicates the number of lines to read in.
+            If negative, the entire file gets processed.
+        mcrae_dir : str, optional
+            Path to the McRae file
+        mcrae_words_only : bool
+            Use McRae words only
+    Returns
+    -------
+    Embedding:
+        The Embedding object
+    """
+    path_to_embedding = input_file
+
+    c2i = {}
+    if mcrae_dir:
+        c2i = _constructing_mcrae_features(mcrae_dir)
+
+    if mcrae_dir is not None and mcrae_words_only is not None:
+        emb = Embedding(path_to_embedding, dense_file, max_words=lines_to_read, words_to_keep=c2i.keys())
+    else:
+        emb = Embedding(path_to_embedding, dense_file, max_words=lines_to_read, words_to_keep=None)
+
+    return emb
+
+
+def main():
+    """
+    For CLI
+    """
     parser = argparse.ArgumentParser(description='Util to read in an embedding file.')
     parser.add_argument('input_file', type=str, help='path to the input file')
 
@@ -135,53 +250,16 @@ def main():
     args = parser.parse_args()
     path_to_embedding = args.input_file
 
-    if args.mcrae_dir:
-        c2i,f2i={},{} # for constructing the McRae feature-concept matrix (should be organized into a separete method)
-        from_idx, to_idx, vals=[],[],[]
-        features_assigned = []
-        for i,l in enumerate(open('{}/McRae-BRM-InPress/CONCS_FEATS_concstats_brm.txt'.format(args.mcrae_dir))):
-            if i==0: continue
-            parts=l.split()
-            if parts[0] not in c2i:
-                c2i[parts[0]] = len(c2i)
-            ci=c2i[parts[0]]
-            features_assigned.append(parts[1])
-            if parts[1] not in f2i:
-                f2i[parts[1]] = len(f2i)
-            fi=f2i[parts[1]]
-            from_idx.append(ci)
-            to_idx.append(fi)
-            vals.append(int(parts[6]))
-
-        feature_freqs = collections.Counter(features_assigned)
-        infrequent_features = set([i for f,i in f2i.items() if feature_freqs[f]<5])
-        f2i_remapping={}
-        for f,i in f2i.items():
-            if i not in infrequent_features:
-                f2i_remapping[i] = len(f2i_remapping)
-
-        i2c = {i:c for c,i in c2i.items()}
-        i2f = {f2i_remapping[i]:f for f,i in f2i.items() if i in f2i_remapping}
-
-        coocc=np.zeros((len(c2i), len(i2f)))
-        features_to_concepts = collections.defaultdict(list)
-        for ci,fi,v in zip(from_idx, to_idx, vals):
-            if fi in f2i_remapping:
-                coocc[ci,f2i_remapping[fi]] += v
-                features_to_concepts[i2f[f2i_remapping[fi]]].append(i2c[ci])
-
-    if args.mcrae_dir is not None and args.mcrae_words_only:
-        emb = Embedding(path_to_embedding, args.dense, max_words=args.lines_to_read, words_to_keep=c2i.keys())
-    else:
-        emb = Embedding(path_to_embedding, args.dense, max_words=args.lines_to_read, words_to_keep=None)
+    emb = read(path_to_embedding, args.dense, args.lines_to_read, args.mcrae_dir, args.mcrae_words_only)
 
     logging.info("The embedding matrix read in has a shape of {}".format(emb.W.shape))
-    
+
     if type(emb.W) == sp.csr_matrix:
         dim_id = 22
         logging.info("top words for dimension {} are".format(dim_id))
         for i, top in enumerate(emb.query_by_index(dim_id)):
             logging.info("#{}: {}".format(i, top))
 
-if __name__== "__main__":
-  main()
+
+if __name__ == "__main__":
+    main()
