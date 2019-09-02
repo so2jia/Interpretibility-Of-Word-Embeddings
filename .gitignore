@@ -108,3 +108,7 @@ venv.bak/
 
 # JetBrains PyCharm
 .idea/
+
+# Corpus, embedding vectors and datasets
+data/
+dataset/
