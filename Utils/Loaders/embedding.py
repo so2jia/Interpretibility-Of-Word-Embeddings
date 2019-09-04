@@ -69,10 +69,10 @@ class Embedding(object):
         if path.endswith('.gz'):
             lines = gzip.open(path, 'rt')
         elif path.endswith('.zip'):
-            myzip = ZipFile(path) # we assume only one embedding file to be included in a zip file
+            myzip = ZipFile(path)  # we assume only one embedding file to be included in a zip file
             lines = myzip.open(myzip.namelist()[0])
         else:
-            lines = open(path)
+            lines = open(path, mode='r', encoding='utf8')
         data, words = [], []
         for counter, line in enumerate(lines):
             if len(words) % 5000 == 0:
@@ -88,15 +88,21 @@ class Embedding(object):
                 continue
             try:
                 values = [float(i) for i in tokens[1:]]
-                if sum([v**2 for v in values])  > 0: # only embeddings with non-zero norm are kept
+                if sum([v**2 for v in values]) > 0:  # only embeddings with non-zero norm are kept
                     data.append(values)
                     words.append(tokens[0])
             except:
                 print('Error while parsing input line #{}: {}'.format(counter, line))
 
+        # Adding unknown vector
+        W = np.array(data)
+        unknown_vector = np.average(W, axis=0)
+        W = np.append(W, np.array([unknown_vector]), axis=0)
+        words.append('<unk>')
+
         i2w = dict(enumerate(words))
         w2i = {v: k for k, v in i2w.items()}
-        return w2i, i2w, np.array(data)
+        return w2i, i2w, W
 
     @staticmethod
     def load_sparse_embeddings(path, words_to_keep=None, max_words=-1):
