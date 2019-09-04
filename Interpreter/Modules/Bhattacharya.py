@@ -15,7 +15,7 @@ class Bhattacharya(Module):
         return self.array
 
     @classmethod
-    def bhatta_distance(self, p, q):
+    def bhatta_distance(cls, p, q):
         # Variance of p and q
         var1 = np.std(p)**2
         var2 = np.std(q)**2

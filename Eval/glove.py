@@ -4,9 +4,32 @@ from Utils.Loaders import corpus as wiki
 
 import numpy as np
 
-embedding = loader.read("../data/glove/glove.6B.300d.txt", True, lines_to_read=10000)
+import logging
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    datefmt='%d-%b-%y %H:%M:%S')
+
+
+def bhatta_distance(p, q):
+    # Variance of p and q
+    var1 = np.std(p) ** 2
+    var2 = np.std(q) ** 2
+
+    # Mean of p and q
+    mean1 = np.mean(p)
+    mean2 = np.mean(q)
+
+    # Formula
+    x = np.log1p((var1 / var2 + var2 / var1 + 2) / 4) / 4
+    bc = x + ((mean1 - mean2) ** 2 / (var1 + var2)) / 4
+    return bc
+
+
+embedding = loader.read("../data/glove/glove.6B.300d.txt", True, lines_to_read=-1)
 semcat = sc.read("../data/semcat/Categories")
 corpus = wiki.read("../data/corpus/enwiki/wiki-100k.txt", 10000)
+
+print(embedding.W.shape)
 
 epsilon = []
 w2e = {}
@@ -25,29 +48,27 @@ for word in corpus:
 epsilon = np.array(epsilon)
 
 # W_b Matrix
-W_b = np.zeros([embedding.W.shape[1], semcat.vocab.__len__()])
+W_b = np.zeros([embedding.W.shape[1], semcat.vocab.__len__()], dtype=np.float)
 
 for i in range(W_b.shape[0]):
     for j in range(W_b.shape[1]):
+        word_indexes = set()
         _p = []
         _q = []
+        # Populate P
         for word in semcat.vocab[semcat.i2c[j]]:
             try:
                 _p.append(epsilon[w2e[word]][i])
+                word_indexes.add(w2e[word])
             except KeyError:
                 _p.append(epsilon[w2e[unk_identifier]][i])
+                word_indexes.add(w2e[unk_identifier])
+        # Populate Q
+        for k in range(epsilon.shape[0]):
+            if k not in word_indexes:
+                _q.append(epsilon[k][i])
+        b = bhatta_distance(_p, _q)
+        W_b[i][j] = b
+    logging.info(f"Calculating W_b... ({i+1}/{W_b.shape[0]})")
 
-
-def bhatta_distance(p, q):
-    # Variance of p and q
-    var1 = np.std(p) ** 2
-    var2 = np.std(q) ** 2
-
-    # Mean of p and q
-    mean1 = np.mean(p)
-    mean2 = np.mean(q)
-
-    # Formula
-    bc = np.log1p((var1 / var2 + var2 / var1 + 2) / 4) / 4 + ((mean1 - mean2) ** 2 / (var1 + var2)) / 4
-    return bc
-
+np.savetxt('../temp/wb.txt', W_b)
