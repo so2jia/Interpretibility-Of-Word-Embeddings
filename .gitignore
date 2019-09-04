@@ -112,3 +112,4 @@ venv.bak/
 # Corpus, embedding vectors and datasets
 data/
 dataset/
+temp/
