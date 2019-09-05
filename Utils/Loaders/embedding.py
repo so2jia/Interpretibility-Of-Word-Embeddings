@@ -96,10 +96,6 @@ class Embedding(object):
 
         # Adding unknown vector
         W = np.array(data)
-        unknown_vector = np.average(W, axis=0)
-        W = np.append(W, np.array([unknown_vector]), axis=0)
-        words.append('<unk>')
-
         i2w = dict(enumerate(words))
         w2i = {v: k for k, v in i2w.items()}
         return w2i, i2w, W

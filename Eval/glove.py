@@ -1,6 +1,9 @@
 from Utils.Loaders import embedding as loader
 from Utils.Loaders import semcat as sc
-from Utils.Loaders import corpus as wiki
+from Eval.glove_funcs.bhattacharya import bhattacharya_matrix
+from Eval.glove_funcs.score import score
+
+from sklearn.preprocessing import StandardScaler
 
 import numpy as np
 
@@ -9,66 +12,37 @@ logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
 
+def main():
+    # Reading files
+    embedding = loader.read("../data/glove/glove.6B.300d.txt", True, lines_to_read=50000)
+    semcat = sc.read("../data/semcat/Categories")
+    corpus = [e for e in embedding.w2i]
 
-def bhatta_distance(p, q):
-    # Variance of p and q
-    var1 = np.std(p) ** 2
-    var2 = np.std(q) ** 2
+    # Calculating Bhattacharya distance
+    W_b, W_bs = bhattacharya_matrix(embedding, semcat, False, True)
 
-    # Mean of p and q
-    mean1 = np.mean(p)
-    mean2 = np.mean(q)
+    # Normalized matrix
+    logging.info("Normalizing Bhattacharya matrix...")
+    W_nb = W_b / np.linalg.norm(W_b, 1, axis=0)
 
-    # Formula
-    x = np.log1p((var1 / var2 + var2 / var1 + 2) / 4) / 4
-    bc = x + ((mean1 - mean2) ** 2 / (var1 + var2)) / 4
-    return bc
+    # Sign corrected matrix
+    logging.info("Performing sign correction...")
+    W_nsb = W_nb * W_bs
+
+    # Standardize epsilon
+    logging.info("Standardising embedding vectors...")
+    scaler = StandardScaler(copy=True, with_mean=True, with_std=True)
+    scaler.fit(embedding.W)
+    epsilon_s = scaler.transform(embedding.W)
+
+    # Calculating
+    I = epsilon_s.dot(W_nsb)
+
+    # Scoring
+    logging.info("Calculating scores...")
+    s = score(embedding, I, semcat, 1)
+    logging.info(f"Score: {s}")
 
 
-embedding = loader.read("../data/glove/glove.6B.300d.txt", True, lines_to_read=-1)
-semcat = sc.read("../data/semcat/Categories")
-corpus = wiki.read("../data/corpus/enwiki/wiki-100k.txt", 10000)
-
-print(embedding.W.shape)
-
-epsilon = []
-w2e = {}
-index = 0
-unk_identifier = '<unk>'
-
-for word in corpus:
-    try:
-        epsilon.append(embedding.W[embedding.w2i[word]])
-        w2e[word] = index
-    except KeyError:
-        epsilon.append(embedding.W[embedding.w2i[unk_identifier]])
-        w2e[unk_identifier] = index
-    index += 1
-
-epsilon = np.array(epsilon)
-
-# W_b Matrix
-W_b = np.zeros([embedding.W.shape[1], semcat.vocab.__len__()], dtype=np.float)
-
-for i in range(W_b.shape[0]):
-    for j in range(W_b.shape[1]):
-        word_indexes = set()
-        _p = []
-        _q = []
-        # Populate P
-        for word in semcat.vocab[semcat.i2c[j]]:
-            try:
-                _p.append(epsilon[w2e[word]][i])
-                word_indexes.add(w2e[word])
-            except KeyError:
-                _p.append(epsilon[w2e[unk_identifier]][i])
-                word_indexes.add(w2e[unk_identifier])
-        # Populate Q
-        for k in range(epsilon.shape[0]):
-            if k not in word_indexes:
-                _q.append(epsilon[k][i])
-        b = bhatta_distance(_p, _q)
-        W_b[i][j] = b
-    logging.info(f"Calculating W_b... ({i+1}/{W_b.shape[0]})")
-
-np.savetxt('../temp/wb.txt', W_b)
+if __name__ == '__main__':
+    main()
