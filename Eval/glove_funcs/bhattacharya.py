@@ -11,7 +11,20 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt='%d-%b-%y %H:%M:%S')
 
 
-def bhatta_distance(p, q):
+def bhatta_distance(p: np.ndarray, q: np.ndarray):
+    """
+    Calculates Bhattacharya distance between two vectors
+    Parameters
+    ----------
+    p
+        The category sampled vector
+    q
+        The out of category sampled vector
+    Returns
+    -------
+    tuple
+        Returns with the distance and the sign of the difference of means
+    """
     # Variance of p and q
     var1 = np.std(p) ** 2
     var2 = np.std(q) ** 2
@@ -27,8 +40,29 @@ def bhatta_distance(p, q):
     return bc, sign
 
 
-def calculation_process(embedding, semcat, category_size, dimension_indexes, id, max_id):
-    
+def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int,
+                        dimension_indexes: list, id: int, max_id: int):
+    """
+    Calculates a slice of the Bhattacharya distance matrix
+    Parameters
+    ----------
+    embedding
+        The Embedding object
+    semcat
+        The SemCat object
+    category_size
+        The number of categories
+    dimension_indexes
+        A list of dimension indexes
+    id
+        The number of the slice (logging)
+    max_id
+        The number of the slices (logging)
+
+    Returns
+    -------
+
+    """
     W_b = np.zeros([embedding.W.shape[1], category_size], dtype=np.float)
     W_bs = np.zeros([embedding.W.shape[1], category_size], dtype=np.int)
 
@@ -81,6 +115,7 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, output_dir="out", 
     W_b = np.zeros([embedding.W.shape[1], semcat.vocab.__len__()], dtype=np.float)
     W_bs = np.zeros(W_b.shape, dtype=np.int)
 
+    # Loading Bhattacharya matrix
     if load:
         prefix = os.path.join(os.getcwd(), output_dir)
         logging.info("Loading Bhattacharya distance matrix...")
@@ -96,14 +131,14 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, output_dir="out", 
         logging.info("Bhattacharya distance matrix loaded!")
         return W_b, W_bs
 
-
-    number_of_processes = 4
+    # Calculating distance matrix
+    number_of_slices = 4
 
     d = W_b.shape[0]
 
-    logging.info(f"Calculating Bhattacharya distance with {number_of_processes} processes!")
+    logging.info(f"Calculating Bhattacharya distance with {number_of_slices} slices!")
 
-    indexes = [[i for i in range(int(d/number_of_processes*p), int(d/number_of_processes*(p+1)))] for p in range(number_of_processes)]
+    indexes = [[i for i in range(int(d/number_of_slices*p), int(d/number_of_slices*(p+1)))] for p in range(number_of_slices)]
 
     slices = [calculation_process(embedding, semcat, W_b.shape[1], i, k+1, len(indexes)) for k, i in enumerate(indexes)]
 
@@ -111,10 +146,7 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, output_dir="out", 
         W_b += np.array(slice[0])
         W_bs += np.array(slice[1])
 
-
-    # if i % 10 == 0:
-    #     logging.info(f"Calculating W_b... ({i + 1}/{W_b.shape[0]})")
-
+    # Saving matrix
     if save:
         prefix = os.path.join(os.getcwd(), output_dir)
         if not os.path.exists(prefix):
