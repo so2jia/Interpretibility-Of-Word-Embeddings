@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 
 from argparse import ArgumentParser
-
+import os
 import logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -16,12 +16,12 @@ logging.basicConfig(level=logging.DEBUG,
 
 
 class Glove:
-    def __init__(self, embedding_path, semcat_dir, output_dir="out", save=True, load=False):
+    def __init__(self, embedding_path, semcat_dir, weights_dir="out", save=True, load=False):
         # Reading files
         self.embedding = loader.read(embedding_path, True, lines_to_read=50000)
         self.semcat = sc.read(semcat_dir)
 
-        self.output_dir = output_dir
+        self.weights_dir = weights_dir
         self.save = save
         self.load = load
 
@@ -31,7 +31,7 @@ class Glove:
 
     def _eval(self):
         # Calculating Bhattacharya distance
-        W_b, W_bs = bhattacharya_matrix(self.embedding, self.semcat, save=self.save, load=self.load)
+        W_b, W_bs = bhattacharya_matrix(self.embedding, self.semcat, output_dir=self.weights_dir, save=self.save, load=self.load)
 
         # Normalized matrix
         logging.info("Normalizing Bhattacharya matrix...")
@@ -50,6 +50,10 @@ class Glove:
         # Calculating
         I = epsilon_s.dot(W_nsb)
 
+        if self.save:
+            prefix = os.path.join(os.getcwd(), self.weights_dir)
+            np.save(os.path.join(prefix, 'I.npy'), I)
+
         self.output = I
 
     def calculate_score(self, lamb=1):
@@ -59,21 +63,9 @@ class Glove:
         # Scoring
         logging.info("Calculating scores...")
         s = score(self.embedding, self.output, self.semcat, lamb)
-        logging.info(f"Score: {s}")
+        logging.info(f"Score with lambda={lamb} => {s}")
         return s
 
 
-if __name__ == '__main__':
-    parser = ArgumentParser(description='Glove interpretibility')
-    parser.add_argument("embedding_path", type=str, required=True)
-    parser.add_argument("semcat_dir", type=str, required=True)
-    parser.add_argument("--lambda_value", type=int, required=False, default=1)
 
-    args = parser.parse_args()
-    embedding_path = args.embedding_path
-    semcat_dir = args.semcat_dir
-    lamb = args.lambda_value
-
-    model = Glove(embedding_path, semcat_dir)
-    model.calculate_score(lamb)
 

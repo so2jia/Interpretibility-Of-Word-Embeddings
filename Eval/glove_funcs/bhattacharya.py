@@ -28,6 +28,7 @@ def bhatta_distance(p, q):
 
 
 def calculation_process(embedding, semcat, category_size, dimension_indexes, id, max_id):
+    
     W_b = np.zeros([embedding.W.shape[1], category_size], dtype=np.float)
     W_bs = np.zeros([embedding.W.shape[1], category_size], dtype=np.int)
 
@@ -52,7 +53,7 @@ def calculation_process(embedding, semcat, category_size, dimension_indexes, id,
             W_b[i][j] = b
             # sign
             W_bs[i][j] = s
-    logging.info(f"Bhattacharya matrix #{id}/{max_id} slice - Done!")
+    logging.info(f"Bhattacharya matrix: slice #{id}/{max_id} calculated...")
     return W_b, W_bs
 
 
@@ -80,9 +81,8 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, output_dir="out", 
     W_b = np.zeros([embedding.W.shape[1], semcat.vocab.__len__()], dtype=np.float)
     W_bs = np.zeros(W_b.shape, dtype=np.int)
 
-    prefix = os.path.join(os.getcwd(), output_dir)
-
     if load:
+        prefix = os.path.join(os.getcwd(), output_dir)
         logging.info("Loading Bhattacharya distance matrix...")
         if not os.path.exists(prefix):
             logging.info(f"Directory does not exists: {prefix}")
@@ -116,8 +116,11 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, output_dir="out", 
     #     logging.info(f"Calculating W_b... ({i + 1}/{W_b.shape[0]})")
 
     if save:
+        prefix = os.path.join(os.getcwd(), output_dir)
         if not os.path.exists(prefix):
             os.mkdir(prefix)
-        np.save(os.path.join(prefix, '/wb.npy'), W_b)
-        np.save(os.path.join(prefix, '/wbs.npy'), W_bs)
+        dest = os.path.join(prefix, 'wb.npy')
+        np.save(dest, W_b)
+        np.save(os.path.join(prefix, 'wbs.npy'), W_bs)
+
     return W_b, W_bs
