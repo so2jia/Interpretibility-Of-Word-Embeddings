@@ -1,3 +1,6 @@
+from multiprocessing import Pool
+import os
+
 import numpy as np
 from Utils.Loaders.embedding import Embedding
 from Utils.Loaders.semcat import SemCat
@@ -24,6 +27,35 @@ def bhatta_distance(p, q):
     return bc, sign
 
 
+def calculation_process(embedding, semcat, category_size, dimension_indexes):
+    W_b = np.zeros([embedding.W.shape[1], category_size], dtype=np.float)
+    W_bs = np.zeros([embedding.W.shape[1], category_size], dtype=np.int)
+
+    for i in dimension_indexes:
+        for j in range(category_size):
+            word_indexes = np.zeros(shape=[embedding.W.shape[0], ], dtype=np.bool)
+            _p = []
+            _q = []
+            # Populate P with category word weights
+            for word in semcat.vocab[semcat.i2c[j]]:
+                try:
+                    word_indexes[embedding.w2i[word]] = True
+                except KeyError:
+                    continue
+            _p = embedding.W[word_indexes, i]
+            # Populate Q with out of category word weights
+            _q = embedding.W[~word_indexes, i]
+            # calculating distance
+            b, s = bhatta_distance(_p, _q)
+
+            # distance
+            W_b[i][j] = b
+            # sign
+            W_bs[i][j] = s
+    logging.info(f"Bhattacharya Process: {os.getpid()} PID - Done!")
+    return W_b, W_bs
+
+
 def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, save=False, load=True):
     """
     Calculating Bhattacharya distance matrix
@@ -42,10 +74,9 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, save=False, load=T
     tuple
         Disarnce Matrix and sign matrix
     """
-    epsilon = embedding.W
     # W_b Matrix
     W_b = np.zeros([embedding.W.shape[1], semcat.vocab.__len__()], dtype=np.float)
-    W_bs = np.ones(W_b.shape, dtype=np.int)
+    W_bs = np.zeros(W_b.shape, dtype=np.int)
 
     if load:
         logging.info("Loading Bhattacharya distance matrix...")
@@ -56,29 +87,31 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, save=False, load=T
         logging.info("Bhattacharya distance matrix loaded!")
         return W_b, W_bs
 
-    # Indexes: i -> dimension, j -> category
-    for i in range(W_b.shape[0]):
-        for j in range(W_b.shape[1]):
-            word_indexes = np.zeros(shape=[embedding.W.shape[0], ], dtype=np.bool)
-            _p = []
-            _q = []
-            # Populate P with category word weights
-            for word in semcat.vocab[semcat.i2c[j]]:
-                try:
-                    word_indexes[embedding.w2i[word]] = True
-                except KeyError:
-                    continue
-            _p = embedding.W[word_indexes, i]
-            # Populate Q with out of category word weights
-            _q = embedding.W[~word_indexes, i]
-            # calculating distance
-            b, s = bhatta_distance(_p, _q)
-            # distance
-            W_b[i][j] = b
-            # sign
-            W_bs[i][j] = s
-        if i % 10 == 0:
-            logging.info(f"Calculating W_b... ({i + 1}/{W_b.shape[0]})")
+
+    number_of_processes = 4
+
+    d = W_b.shape[0]
+
+    logging.info(f"Calculating Bhattacharya distance with {number_of_processes} processes!")
+
+    process_pool = Pool(processes=number_of_processes)
+
+    indexes = [[i for i in range(int(d/number_of_processes*p), int(d/number_of_processes*(p+1)))] for p in range(number_of_processes)]
+
+    arg_list = [(embedding, semcat, W_b.shape[1], i) for i in indexes]
+    slices = [process_pool.starmap(calculation_process, arg_list)]
+
+    process_pool.close()
+    process_pool.join()
+
+    for slice in slices[0]:
+        W_b += np.array(slice[0])
+        W_bs += np.array(slice[1])
+
+
+    # if i % 10 == 0:
+    #     logging.info(f"Calculating W_b... ({i + 1}/{W_b.shape[0]})")
+
     if save:
         np.save('../temp/wb.npy', W_b)
         np.save('../temp/wbs.npy', W_bs)
