@@ -1,8 +1,5 @@
 # Interpretibility Of Word Embeddings
 
-### **Corpus**
-
-[TOP 100K frequently used English words](https://gist.github.com/h3xx/1976236)
 
 ### **Related papers:** 
 

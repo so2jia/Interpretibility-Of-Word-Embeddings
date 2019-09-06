@@ -12,14 +12,14 @@ logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
 
+
 def main():
     # Reading files
     embedding = loader.read("../data/glove/glove.6B.300d.txt", True, lines_to_read=50000)
     semcat = sc.read("../data/semcat/Categories")
-    corpus = [e for e in embedding.w2i]
 
     # Calculating Bhattacharya distance
-    W_b, W_bs = bhattacharya_matrix(embedding, semcat, False, True)
+    W_b, W_bs = bhattacharya_matrix(embedding, semcat, save=True, load=False)
 
     # Normalized matrix
     logging.info("Normalizing Bhattacharya matrix...")

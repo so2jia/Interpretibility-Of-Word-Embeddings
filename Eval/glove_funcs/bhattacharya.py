@@ -56,22 +56,21 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, save=False, load=T
         logging.info("Bhattacharya distance matrix loaded!")
         return W_b, W_bs
 
+    # Indexes: i -> dimension, j -> category
     for i in range(W_b.shape[0]):
         for j in range(W_b.shape[1]):
-            word_indexes = set()
+            word_indexes = np.zeros(shape=[embedding.W.shape[0], ], dtype=np.bool)
             _p = []
             _q = []
-            # Populate P
+            # Populate P with category word weights
             for word in semcat.vocab[semcat.i2c[j]]:
                 try:
-                    _p.append(epsilon[embedding.w2i[word]][i])
-                    word_indexes.add(embedding.w2i[word])
+                    word_indexes[embedding.w2i[word]] = True
                 except KeyError:
                     continue
-            # Populate Q
-            for k in range(epsilon.shape[0]):
-                if k not in word_indexes:
-                    _q.append(epsilon[k][i])
+            _p = embedding.W[word_indexes, i]
+            # Populate Q with out of category word weights
+            _q = embedding.W[~word_indexes, i]
             # calculating distance
             b, s = bhatta_distance(_p, _q)
             # distance
