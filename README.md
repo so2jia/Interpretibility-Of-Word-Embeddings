@@ -1,5 +1,15 @@
 # Interpretability Of Word Embeddings
 
+### **Requirements**
+
+Tested with Python 3.7.4.<br>
+
+Every dependency can be found in the [Requirements file](requirements.txt).
+
+##### **Pip:**
+
+`pip install -r requirements.txt`
+
 ### **Usage**
 
 `
@@ -15,3 +25,8 @@ save - A flag whether you want to save the weights or not<br>
 ### **Related papers:** 
 
 [Semantic Structure and Interpretability of Word Embeddings](https://arxiv.org/pdf/1711.00331.pdf)
+
+### **Related links**
+
+- [Glove](https://nlp.stanford.edu/projects/glove/)<br>
+- [Semcat Dataset](https://github.com/avaapm/SEMCATdataset2018)
