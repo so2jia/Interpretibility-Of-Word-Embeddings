@@ -1,5 +1,5 @@
-from multiprocessing import Pool
 import os
+import sys
 
 import numpy as np
 from Utils.Loaders.embedding import Embedding
@@ -27,7 +27,7 @@ def bhatta_distance(p, q):
     return bc, sign
 
 
-def calculation_process(embedding, semcat, category_size, dimension_indexes):
+def calculation_process(embedding, semcat, category_size, dimension_indexes, id, max_id):
     W_b = np.zeros([embedding.W.shape[1], category_size], dtype=np.float)
     W_bs = np.zeros([embedding.W.shape[1], category_size], dtype=np.int)
 
@@ -52,11 +52,11 @@ def calculation_process(embedding, semcat, category_size, dimension_indexes):
             W_b[i][j] = b
             # sign
             W_bs[i][j] = s
-    logging.info(f"Bhattacharya Process: {os.getpid()} PID - Done!")
+    logging.info(f"Bhattacharya matrix #{id}/{max_id} slice - Done!")
     return W_b, W_bs
 
 
-def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, save=False, load=True):
+def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, output_dir="out", save=False, load=True):
     """
     Calculating Bhattacharya distance matrix
     Parameters
@@ -65,6 +65,8 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, save=False, load=T
         Embedding object
     semcat
         SemCat object
+    output_dir
+        The path of a directory where the weights will be saved or loaded from
     save
         Save weights
     load
@@ -78,12 +80,19 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, save=False, load=T
     W_b = np.zeros([embedding.W.shape[1], semcat.vocab.__len__()], dtype=np.float)
     W_bs = np.zeros(W_b.shape, dtype=np.int)
 
+    prefix = os.path.join(os.getcwd(), output_dir)
+
     if load:
         logging.info("Loading Bhattacharya distance matrix...")
+        if not os.path.exists(prefix):
+            logging.info(f"Directory does not exists: {prefix}")
+            sys.exit(1)
+
         # Distance matrix
-        W_b = np.load('../temp/wb.npy')
+        W_b = np.load(os.path.join(prefix, '/wb.npy'))
         # Distance matrix signs
-        W_bs = np.load('../temp/wbs.npy')
+        W_bs = np.load(os.path.join(prefix, '/wbs.npy'))
+
         logging.info("Bhattacharya distance matrix loaded!")
         return W_b, W_bs
 
@@ -94,17 +103,11 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, save=False, load=T
 
     logging.info(f"Calculating Bhattacharya distance with {number_of_processes} processes!")
 
-    process_pool = Pool(processes=number_of_processes)
-
     indexes = [[i for i in range(int(d/number_of_processes*p), int(d/number_of_processes*(p+1)))] for p in range(number_of_processes)]
 
-    arg_list = [(embedding, semcat, W_b.shape[1], i) for i in indexes]
-    slices = [process_pool.starmap(calculation_process, arg_list)]
+    slices = [calculation_process(embedding, semcat, W_b.shape[1], i, k+1, len(indexes)) for k, i in enumerate(indexes)]
 
-    process_pool.close()
-    process_pool.join()
-
-    for slice in slices[0]:
+    for slice in slices:
         W_b += np.array(slice[0])
         W_bs += np.array(slice[1])
 
@@ -113,6 +116,8 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, save=False, load=T
     #     logging.info(f"Calculating W_b... ({i + 1}/{W_b.shape[0]})")
 
     if save:
-        np.save('../temp/wb.npy', W_b)
-        np.save('../temp/wbs.npy', W_bs)
+        if not os.path.exists(prefix):
+            os.mkdir(prefix)
+        np.save(os.path.join(prefix, '/wb.npy'), W_b)
+        np.save(os.path.join(prefix, '/wbs.npy'), W_bs)
     return W_b, W_bs
