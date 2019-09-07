@@ -23,7 +23,6 @@ weights_dir - A path where the weights going to be saved to or read from (f.e. "
 save - A flag whether you want to save the weights<br>
 load - A flag whether you want to load the weights<br>
 
-
 ### **Related papers:** 
 
 [Semantic Structure and Interpretability of Word Embeddings](https://arxiv.org/pdf/1711.00331.pdf)
