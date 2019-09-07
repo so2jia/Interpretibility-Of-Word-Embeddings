@@ -13,7 +13,7 @@ Every dependency can be found in the [Requirements file](requirements.txt).
 ### **Usage**
 
 `
-python glove_cli.py <embedding_path> <semcat_dir> [-h] [--lambda_value] [--weights_dir ] [--save]
+python glove_cli.py <embedding_path> <semcat_dir> [-h] [--lambda_value] [--weights_dir] [--save] [--load]
 `
 
 embedding_path - Path to the Glove embedding file (f.e. "glove/glove.6B.300d.txt")<br>
