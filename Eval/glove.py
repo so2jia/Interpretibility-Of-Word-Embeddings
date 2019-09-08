@@ -6,7 +6,7 @@ from Eval.glove_funcs.score import score
 from sklearn.preprocessing import StandardScaler
 
 import numpy as np
-
+from numpy import ndarray
 from argparse import ArgumentParser
 import os
 import logging
@@ -61,11 +61,52 @@ class Glove:
             logging.info("Eval not called!")
             return None
         # Scoring
-        logging.info("Calculating scores...")
+        logging.info("Calculating score...")
         s = score(self.embedding, self.output, self.semcat, lamb)
         logging.info(f"Score with lambda={lamb} => {s}")
         return s
 
+    def calculate_semantic_decomposition(self, word: str, top=20):
+        """
+        Calculating semantic decomposition of a word
+        Parameters
+        ----------
+        word: str
+            The word to decompose
+        top: int
+            The number of top categories to get
 
+        Returns
+        -------
+        ndarray:
+            An array where the first vector contains the category/dimension ID and the second the weight
+        """
+        logging.info(f"Semantic decomposition of word: {word}")
+        logging.info("=========================================")
 
+        # IDs of categories which containing the word
+        word_categories = []
+        for cat in self.semcat.vocab:
+            if word in self.semcat.vocab[cat]:
+                word_categories.append(self.semcat.c2i[cat])
 
+        category_dims = self.output[self.embedding.w2i[word], :]
+
+        # creating dimension - weight matrix
+        cid = []
+        for k, v in enumerate(category_dims):
+            cid.append([k, v])
+
+        cid = np.array(cid)
+
+        # sorting by weights
+        cid_sorted = cid[cid[:, 1].argsort()]
+
+        # printing out the top 20 category
+        for vec in cid_sorted[-top:, :]:
+            if vec[0] in word_categories:
+                logging.info(f"> {self.semcat.i2c[vec[0]]}: {vec[1]}")
+            else:
+                logging.info(f"{self.semcat.i2c[vec[0]]}: {vec[1]}")
+
+        return cid_sorted[-top:, :]
