@@ -91,7 +91,7 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
     return W_b, W_bs
 
 
-def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, output_dir="out", save=False, load=True):
+def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, weights_dir="out", save_weights=False, load_weights=True):
     """
     Calculating Bhattacharya distance matrix
     Parameters
@@ -100,11 +100,11 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, output_dir="out", 
         Embedding object
     semcat
         SemCat object
-    output_dir
+    weights_dir
         The path of a directory where the weights will be saved or loaded from
-    save
+    save_weights
         Save weights
-    load
+    load_weights
         Load weight
     Returns
     -------
@@ -116,8 +116,8 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, output_dir="out", 
     W_bs = np.zeros(W_b.shape, dtype=np.int)
 
     # Loading Bhattacharya matrix
-    if load:
-        prefix = os.path.join(os.getcwd(), output_dir)
+    if load_weights:
+        prefix = os.path.join(os.getcwd(), weights_dir)
         logging.info("Loading Bhattacharya distance matrix...")
         if not os.path.exists(prefix):
             logging.info(f"Directory does not exists: {prefix}")
@@ -147,8 +147,8 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, output_dir="out", 
         W_bs += np.array(slice[1])
 
     # Saving matrix
-    if save:
-        prefix = os.path.join(os.getcwd(), output_dir)
+    if save_weights:
+        prefix = os.path.join(os.getcwd(), weights_dir)
         if not os.path.exists(prefix):
             os.mkdir(prefix)
         dest = os.path.join(prefix, 'wb.npy')

@@ -4,7 +4,23 @@ import numpy as np
 embedding_path = "data/glove/glove.6B.300d.txt"
 semcat_path = "data/semcat/Categories"
 
-model = Glove(embedding_path, semcat_path, weights_dir="out", save=False, load=True)
+embedding_params = \
+    {
+        "input_file": embedding_path,
+        "dense_file": True,
+        "lines_to_read": 50000,
+        "mcrae_dir": None,
+        "mcrae_words_only": False
+    }
+
+eval_params = \
+    {
+        "weights_dir": "out/",
+        "save_weights": False,
+        "load_weights": True
+    }
+
+model = Glove(embedding_params=embedding_params, semcat_dir=semcat_path, eval_params=eval_params)
 
 model.calculate_semantic_decomposition("window", top=20, save=True)
 

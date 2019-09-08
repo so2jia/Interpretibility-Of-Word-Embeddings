@@ -16,22 +16,63 @@ logging.basicConfig(level=logging.DEBUG,
 
 
 class Glove:
-    def __init__(self, embedding_path, semcat_dir, weights_dir="out", save=True, load=False):
+    def __init__(self, embedding_params: dict, semcat_dir, eval_params, calculation_type, calculation_args):
+        """
+
+        Parameters
+        ----------
+        embedding_params: dict
+            {
+            "input_file": embedding_path,
+            "dense_file": dense_file,
+            "lines_to_read": lines_to_read,
+            "mcrae_dir": mcrae_dir,
+            "mcrae_words_only": mcrae_words_only
+            }
+        semcat_dir: str
+            Path to SemCat Categories directory
+        """
+        if embedding_params["dense_file"] is None:
+            embedding_params["dense_file"] = False
+        if embedding_params["lines_to_read"] is None:
+            embedding_params["lines_to_read"] = -1
+
+        if embedding_params["mcrae_words_only"] is None:
+            embedding_params["mcrae_words_only"] = False
+
+        if eval_params["weights_dir"] is None:
+            eval_params["weights_dir"] = "out"
+
+        if eval_params["save_weights"] is None:
+            eval_params["save_weights"] = False
+        if eval_params["load_weights"] is None:
+            eval_params["load_weights"] = False
+
         # Reading files
-        self.embedding = loader.read(embedding_path, True, lines_to_read=50000)
+        self.embedding = loader.read(**embedding_params)
         self.semcat = sc.read(semcat_dir)
 
-        self.weights_dir = weights_dir
-        self.save = save
-        self.load = load
+        self.eval_params = eval_params
+        self.eval_params["embedding"] = self.embedding
+        self.eval_params["semcat"] = self.semcat
+
+        self.calc_types = {
+            "score": self.calculate_score,
+            "decomp": self.calculate_semantic_decomposition
+        }
 
         self.output = None
 
         self._eval()
 
+        if calculation_type in self.calc_types.keys():
+            self.calc_types[calculation_type](*calculation_args)
+        else:
+            logging.info("Wrong calculation type provided or not provided at all!")
+
     def _eval(self):
         # Calculating Bhattacharya distance
-        W_b, W_bs = bhattacharya_matrix(self.embedding, self.semcat, output_dir=self.weights_dir, save=self.save, load=self.load)
+        W_b, W_bs = bhattacharya_matrix(**self.eval_params)
 
         # Normalized matrix
         logging.info("Normalizing Bhattacharya matrix...")
@@ -50,13 +91,22 @@ class Glove:
         # Calculating
         I = epsilon_s.dot(W_nsb)
 
-        if self.save:
-            prefix = os.path.join(os.getcwd(), self.weights_dir)
+        if self.eval_params["save_weights"]:
+            prefix = os.path.join(os.getcwd(), self.eval_params["weights_dir"])
             np.save(os.path.join(prefix, 'I.npy'), I)
 
         self.output = I
 
     def calculate_score(self, lamb=1):
+        if type(lamb) != int:
+            try:
+                lamb = int(lamb)
+            except TypeError:
+                logging.info("Lambda value is not an integer or can be converted to it!")
+
+        if lamb < 1:
+            logging.info("Lambda must be greater or equal to 1")
+
         if self.output is None:
             logging.info("Eval not called!")
             return None
@@ -82,6 +132,20 @@ class Glove:
         ndarray:
             An array where the first vector contains the category/dimension ID and the second the weight
         """
+        if type(word) != str:
+            word = str(word)
+
+        if type(top) != int:
+            try:
+                top = int(top)
+            except TypeError:
+                logging.info("Calculation param: TOP can not be converted to int")
+
+        if type(save) != bool:
+            try:
+                save = bool(save)
+            except TypeError:
+                logging.info("Calculation param: SAVE can not be converted to bool")
         logging.info(f"Semantic decomposition of word: {word}")
         logging.info("=========================================")
 
@@ -117,3 +181,6 @@ class Glove:
                     f.write(f"{self.semcat.i2c[vec[0]]} {vec[0]} {vec[1]}\n")
 
         return top_values
+
+    def get_calculation_types(self):
+        return self.calc_types.keys()
