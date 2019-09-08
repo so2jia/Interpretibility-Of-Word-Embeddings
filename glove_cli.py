@@ -12,7 +12,7 @@ if __name__ == '__main__':
                         help="Path to the SemCat Categories directory")
 
     # Embedding related parameters
-    parser.add_argument('-dense_file', action='store_true')
+    parser.add_argument('-dense_file', action='store_true', help='Mark if it is a dense embedding file')
     parser.set_defaults(dense=False)
     parser.add_argument('--lines_to_read', type=int, help='number of embeddings to read', default=-1)
     parser.add_argument('--mcrae_dir', type=str, help='path to the McRae file', default=None)
@@ -23,9 +23,9 @@ if __name__ == '__main__':
                         help="The directory where weight matrices loaded from and saved to"
                              "(f.e. I.npy, wb.npy, wbs.npy). Default is \"out/\", if not provided.")
     parser.add_argument("-save_weights", action="store_true", required=False,
-                        help="Flag whether you want to save the matrices or not.")
+                        help="Flag whether you want to save the matrices")
     parser.add_argument("-load_weights", action="store_true", required=False,
-                        help="Flag whether you want to load the matrices or not.")
+                        help="Flag whether you want to load the matrices")
 
     # Validation
     parser.add_argument("--calculate", type=str, required=False, default="score",
