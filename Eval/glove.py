@@ -66,7 +66,7 @@ class Glove:
         logging.info(f"Score with lambda={lamb} => {s}")
         return s
 
-    def calculate_semantic_decomposition(self, word: str, top=20):
+    def calculate_semantic_decomposition(self, word: str, top=20, save=False):
         """
         Calculating semantic decomposition of a word
         Parameters
@@ -75,7 +75,8 @@ class Glove:
             The word to decompose
         top: int
             The number of top categories to get
-
+        save: bool
+            Save to file
         Returns
         -------
         ndarray:
@@ -103,10 +104,16 @@ class Glove:
         cid_sorted = cid[cid[:, 1].argsort()]
 
         # printing out the top 20 category
-        for vec in cid_sorted[-top:, :]:
+        top_values = cid_sorted[-top:, :]
+        for vec in top_values:
             if vec[0] in word_categories:
                 logging.info(f"> {self.semcat.i2c[vec[0]]}: {vec[1]}")
             else:
                 logging.info(f"{self.semcat.i2c[vec[0]]}: {vec[1]}")
 
-        return cid_sorted[-top:, :]
+        if save:
+            with open(f"out/decom-{word}.txt", mode="w", encoding="utf8") as f:
+                for vec in top_values:
+                    f.write(f"{self.semcat.i2c[vec[0]]} {vec[0]} {vec[1]}\n")
+
+        return top_values

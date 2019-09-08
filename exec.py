@@ -6,7 +6,7 @@ semcat_path = "data/semcat/Categories"
 
 model = Glove(embedding_path, semcat_path, weights_dir="out", save=False, load=True)
 
-model.calculate_semantic_decomposition("window")
+model.calculate_semantic_decomposition("window", top=20, save=True)
 
 # scores = []
 #
