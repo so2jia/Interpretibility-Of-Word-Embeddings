@@ -20,9 +20,8 @@ eval_params = \
         "load_weights": True
     }
 
-model = Glove(embedding_params=embedding_params, semcat_dir=semcat_path, eval_params=eval_params)
-
-model.calculate_semantic_decomposition("window", top=20, save=True)
+model = Glove(embedding_params=embedding_params, semcat_dir=semcat_path, eval_params=eval_params,
+              calculation_type="score", calculation_args=[])
 
 # scores = []
 #
