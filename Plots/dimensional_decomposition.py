@@ -3,6 +3,7 @@ import numpy as np
 from argparse import ArgumentParser
 from Utils.Loaders.semcat import read
 
+
 def plot_categorical_decomposition(semcat_dir, input_file, category, output_file=None):
     """
     Plot categorical decomposition
