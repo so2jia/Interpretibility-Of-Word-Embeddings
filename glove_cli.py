@@ -21,7 +21,7 @@ if __name__ == '__main__':
     # Model related parameteres
     parser.add_argument("--weights_dir", type=str, required=False,
                         help="The directory where weight matrices loaded from and saved to"
-                             "(f.e. I.npy, wb.npy, wbs.npy). Default is \"out/\", if not provided.")
+                             "(f.e. I.npy, w_b.npy, w_bs.npy). Default is \"out/\", if not provided.")
     parser.add_argument("-save_weights", action="store_true", required=False,
                         help="Flag whether you want to save the matrices")
     parser.add_argument("-load_weights", action="store_true", required=False,

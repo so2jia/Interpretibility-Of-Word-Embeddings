@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-I = np.load("../out/I.npy")
+w = np.load("../out/w_nsb.npy")
+print(w)

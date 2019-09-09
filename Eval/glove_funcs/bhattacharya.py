@@ -124,9 +124,9 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, weights_dir="out",
             sys.exit(1)
 
         # Distance matrix
-        W_b = np.load(os.path.join(prefix, '/wb.npy'))
+        W_b = np.load(os.path.join(prefix, '/w_b.npy'))
         # Distance matrix signs
-        W_bs = np.load(os.path.join(prefix, '/wbs.npy'))
+        W_bs = np.load(os.path.join(prefix, '/w_bs.npy'))
 
         logging.info("Bhattacharya distance matrix loaded!")
         return W_b, W_bs
@@ -151,8 +151,8 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, weights_dir="out",
         prefix = os.path.join(os.getcwd(), weights_dir)
         if not os.path.exists(prefix):
             os.mkdir(prefix)
-        dest = os.path.join(prefix, 'wb.npy')
+        dest = os.path.join(prefix, 'w_b.npy')
         np.save(dest, W_b)
-        np.save(os.path.join(prefix, 'wbs.npy'), W_bs)
+        np.save(os.path.join(prefix, 'w_bs.npy'), W_bs)
 
     return W_b, W_bs

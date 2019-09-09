@@ -16,16 +16,13 @@ embedding_params = \
 eval_params = \
     {
         "weights_dir": "out/",
-        "save_weights": False,
-        "load_weights": True
+        "save_weights": True,
+        "load_weights": False
     }
 
 model = Glove(embedding_params=embedding_params, semcat_dir=semcat_path, eval_params=eval_params,
-              calculation_type="decomp", calculation_args=["window", 20, True])
+              calculation_type="score", calculation_args=[5])
 
-model.calculate_semantic_decomposition("bus", 20, True)
-model.calculate_semantic_decomposition("soldier", 20, True)
-model.calculate_semantic_decomposition("article", 20, True)
 
 # scores = []
 #
