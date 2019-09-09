@@ -21,7 +21,11 @@ eval_params = \
     }
 
 model = Glove(embedding_params=embedding_params, semcat_dir=semcat_path, eval_params=eval_params,
-              calculation_type="score", calculation_args=[])
+              calculation_type="decomp", calculation_args=["window", 20, True])
+
+model.calculate_semantic_decomposition("bus", 20, True)
+model.calculate_semantic_decomposition("soldier", 20, True)
+model.calculate_semantic_decomposition("article", 20, True)
 
 # scores = []
 #
