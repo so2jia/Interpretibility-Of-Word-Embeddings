@@ -72,8 +72,10 @@ class Glove:
         }
 
         self.output = None
-
-        self._eval()
+        if embedding_params["dense_file"]:
+            self._eval()
+        else:
+            logging.info("Sparse model is not implemented yet!")
 
         if calculation_type in self.calc_types.keys():
             self.calc_types[calculation_type](*calculation_args)
@@ -159,6 +161,11 @@ class Glove:
             except TypeError:
                 logging.info("Calculation param: SAVE can not be converted to bool")
                 return None
+
+        if self.output is None:
+            logging.info("Eval not called!")
+            return None
+
         logging.info(f"Semantic decomposition of word: {word}")
         logging.info("=========================================")
 
