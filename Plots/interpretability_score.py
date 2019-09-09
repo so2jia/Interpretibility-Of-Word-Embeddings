@@ -25,7 +25,7 @@ def plot_interpretability_scores(input_file, output_file=None):
 
 
 if __name__ == '__main__':
-    parser = ArgumentParser(description='Glove interpretibility')
+    parser = ArgumentParser(description='Interpretability Score')
 
     parser.add_argument("input_file", type=str,
                         help="Input file which contains the list of the scores")

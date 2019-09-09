@@ -62,7 +62,7 @@ def plot_semantic_decomposition(semcat: str, input_file:str, output_file=None):
 
 
 if __name__ == '__main__':
-    parser = ArgumentParser(description='Glove interpretibility')
+    parser = ArgumentParser(description='Semantical Decomposition')
 
     # Required parameters
     parser.add_argument("semcat_dir", type=str,
