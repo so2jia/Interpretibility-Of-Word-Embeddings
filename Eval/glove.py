@@ -31,6 +31,16 @@ class Glove:
             }
         semcat_dir: str
             Path to SemCat Categories directory
+        eval_params: dict
+            {
+                "weights_dir": "out/",
+                "save_weights": False,
+                "load_weights": True
+            }
+        calculation_type: str
+            ['score'|'decomp']
+        calculation_args: list
+            *args
         """
         if embedding_params["dense_file"] is None:
             embedding_params["dense_file"] = False
@@ -103,6 +113,7 @@ class Glove:
                 lamb = int(lamb)
             except TypeError:
                 logging.info("Lambda value is not an integer or can be converted to it!")
+                return None
 
         if lamb < 1:
             logging.info("Lambda must be greater or equal to 1")
@@ -140,12 +151,14 @@ class Glove:
                 top = int(top)
             except TypeError:
                 logging.info("Calculation param: TOP can not be converted to int")
+                return None
 
         if type(save) != bool:
             try:
                 save = bool(save)
             except TypeError:
                 logging.info("Calculation param: SAVE can not be converted to bool")
+                return None
         logging.info(f"Semantic decomposition of word: {word}")
         logging.info("=========================================")
 
