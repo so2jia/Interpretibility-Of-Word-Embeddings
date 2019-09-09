@@ -149,8 +149,6 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, weights_dir="out",
     # Saving matrix
     if save_weights:
         prefix = os.path.join(os.getcwd(), weights_dir)
-        if not os.path.exists(prefix):
-            os.mkdir(prefix)
         dest = os.path.join(prefix, 'w_b.npy')
         np.save(dest, W_b)
         np.save(os.path.join(prefix, 'w_bs.npy'), W_bs)
