@@ -69,16 +69,17 @@ python semantic_decomposition.py <semcat_dir> <input_file> [-h] [--output_file O
 ## **Dimensional interpretability according to KS-test value**
 
 `
-python ks_dimensional_interpretability.py <input_file> <embedding_file> <semcat_dir>  
+python interpretability_correlation.py <embedding_s> <bhatta> <test_type>  
 [-h] [--lines_to_read LINES_TO_READ] [--output_file OUTPUT_FILE]
 `
 
-- **input_file** - Embedding-Category matrix (I.npy)
-- **embedding_file** - Embedding file (Use the same embedding file like in the evaluation)
-- **semcat_dir** - Path to the SemCat categories directory (f.e. "semcat/Categories")
-- **lines_to_read** - Maximum number of vectors to read from the embedding file. Default -1 (all). 
-                      (Read the same amount of lines like in the evaluation)
+- **embedding_s** - Standardised embedding vectors (.npy)
+- **bhatta** - Bhattacharya matrix (.npy)
+- **test_type** - Normalitytest types: 
+[[ks](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.normaltest.html), 
+[normal](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.normaltest.html), 
+[shapiro](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.shapiro.html)]
 - **output_file** - Output PNG file (Optional)
 
 **Output:**<br><br>
-![Categorical Decomposition](../../images/plots/glove_dense/dim-interpret_ks-test.png)
+![Categorical Decomposition](../../images/plots/glove_dense/ks_test.png)
