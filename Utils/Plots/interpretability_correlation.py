@@ -5,6 +5,8 @@ import scipy.stats as stats
 from argparse import ArgumentParser
 from Utils.Loaders.semcat import read as semcat_reader, SemCat
 from Utils.Loaders.embedding import read as embedding_reader, Embedding
+from sklearn.preprocessing import normalize
+import os
 
 import logging
 logging.basicConfig(level=logging.DEBUG,
@@ -59,16 +61,21 @@ def anderson(x: np.ndarray):
     return anderson, p_values
 
 
-def interpretability_score(e_s: np.ndarray, w_b: np.ndarray, embedding: Embedding, semcat: SemCat, lamb=5):
+def interpretability_score(e_s: np.ndarray, w_b: np.ndarray, embedding: Embedding, semcat: SemCat, lamb=5, norm=False):
     logging.info("Calculating interpretability...")
 
     IS_i = []
 
-    D = e_s.shape[1]
+    D = embedding.W.shape[1]
     K = semcat.i2c.__len__()
 
+    embedding_space = embedding.W
+
+    if norm:
+        embedding_space = normalize(embedding_space)
+
     for d in range(D):
-        D_1 = np.array([e_s[:, d]])
+        D_1 = np.array([embedding_space[:, d]])
         D_2 = np.array([np.arange(D_1.shape[1])])
         di = np.append(D_1, D_2, axis=0)
         di_sorted = di[:, di[0, :].argsort()]
@@ -97,42 +104,70 @@ def interpretability_score(e_s: np.ndarray, w_b: np.ndarray, embedding: Embeddin
     return np.array(IS_i)
 
 
-def test(input_file: str, bhatta:str, test_type:str, embedding_path, semcat_dir, output_file=None):
+def test(input_file: str, bhatta: str, test_type: str, embedding_path: str, semcat_dir: str, params: dict):
     """
-    Makes a scatter plot of the dimensional interpretability score according to the KS-test value
+    Normality test and interpretability score correlation
     Parameters
     ----------
     input_file: str
-        Path to Input file
-    output_file: str
-        Path to save plot as PNG (Optional)
-
+        File of standardised embedding matrix
+    bhatta: str
+        File of Bhattacharyya distance matrix
+    test_type: str
+        Test types: [ks, normal, shapiro]
+    embedding_path: str
+        Embedding file
+    semcat_dir: str
+        SemCat directory
+    params: dict
+        params = {
+            "norm": bool,
+            "dense": bool,
+            "lines_to_read": int,
+            "output_file": str
+        }
     Returns
     -------
 
     """
 
-    embedding = embedding_reader(embedding_path, True, 50000)
+    embedding = embedding_reader(embedding_path, params["dense"], params["lines_to_read"])
     semcat = semcat_reader(semcat_dir)
 
     test_types = {
         "ks": ks_test,
         "normal": normal_test,
         "shapiro": shapiro,
-        "anderson": None,
     }
 
     e_s = np.load(input_file)
     w_b = np.load(bhatta)
 
     val, p, name = test_types[test_type](e_s)
-    score = interpretability_score(e_s, w_b, embedding, semcat)
+    score = interpretability_score(e_s, w_b, embedding, semcat, norm=params["norm"])
 
     correlate = stats.pearsonr(score, p)
 
-    print(f"Pearson r: {correlate}")
+    path = params["output_file"].split('/')
+    fp = path[-1].split('.')[0:-1]
+    dir_path = ""
+    for x in path[:-1]:
+        dir_path.join(x)
 
-    plotting(score, val, p, name, output_file)
+    fname = ""
+    for x in fp:
+        fname.join(x)
+
+    fname.join("-stats.txt")
+
+    p = os.path.join(dir_path, fname)
+    with open(p, mode="w", encoding="utf8") as f:
+        f.write(f"# Pearson (R, P)\n{correlate}\n# IS\n{sum(score)/score.shape[0]}")
+
+    logging.info(f"Pearson r: {correlate}")
+    logging.info(f"IS':{sum(score)/score.shape[0]}")
+
+    plotting(score, val, p, name, params["output_file"])
 
 
 def plotting(dim, ks, p, name, output):
@@ -142,7 +177,7 @@ def plotting(dim, ks, p, name, output):
     fig: Figure
     fig, axs = plt.subplots(1, 2, sharey=True)
     axs[0].scatter(ks, dim)
-    axs[0].set_xlabel("KS-test value")
+    axs[0].set_xlabel("Test value")
     axs[0].set_ylabel("Dimensional interpretability")
     fig.suptitle(name, fontsize=16)
 
@@ -173,7 +208,13 @@ if __name__ == '__main__':
     parser.add_argument("semcat_dir", type=str,
                         help="SemCat Categories dir")
     parser.add_argument("test_type", type=str,
-                        help="Test types: [ks, normal, shapiro, anderson]")
+                        help="Test types: [ks, normal, shapiro]")
+    parser.add_argument("-norm", type=bool,
+                        help="l2 norm of embedding space")
+    parser.add_argument("-dense", type=bool,
+                        help="Dense embedding")
+    parser.add_argument("--line_to_read", type=int, default=50000,
+                        help="Maximum line to read from embedding file")
     parser.add_argument("--output_file", type=str,
                         help="Output PNG file (Optional)")
 
@@ -184,7 +225,17 @@ if __name__ == '__main__':
     bhatta = args.bhatta
     semcat_dir = args.semcat_dir
     test_type = args.test_type
+    norm = args.norm
+    dense = args.dense
+    line_to_read = args.line_to_read
     output_file = args.output_file
 
+    params = {
+        "norm": False if norm is None else norm,
+        "dense": False if dense is None else dense,
+        "lines_to_read": line_to_read,
+        "output_file": output_file
+    }
+
     test(input_file=embedding_s, bhatta=bhatta, test_type=test_type, embedding_path=embedding, semcat_dir=semcat_dir,
-         output_file=output_file)
+         params=params)

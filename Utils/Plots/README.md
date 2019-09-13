@@ -73,12 +73,17 @@ python interpretability_correlation.py <embedding_s> <bhatta> <test_type>
 [-h] [--lines_to_read LINES_TO_READ] [--output_file OUTPUT_FILE]
 `
 
+- **embedding** - Embedding file
 - **embedding_s** - Standardised embedding vectors (.npy)
 - **bhatta** - Bhattacharya matrix (.npy)
+- **semcat_dir** - SemCat Categories directory
 - **test_type** - Normalitytest types: 
 [[ks](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.normaltest.html), 
 [normal](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.normaltest.html), 
 [shapiro](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.shapiro.html)]
+- **norm** - L2 Normalize embedding space
+- **dense** - Dense embedding
+- **lines_to_read** - Maximum lines to read from embedding
 - **output_file** - Output PNG file (Optional)
 
 **Output:**<br><br>
