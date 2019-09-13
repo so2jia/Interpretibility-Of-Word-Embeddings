@@ -90,13 +90,7 @@ def interpretability_score(e_s: np.ndarray, w_b: np.ndarray, embedding: Embeddin
 
             IS_ij.append(IS_b)
 
-        max_j = 0
-        for j in range(IS_ij.__len__()):
-            T_1 = np.array([w_b[j, :]])
-            T_2 = np.array([np.arange(T_1.shape[1])])
-            wb_j = np.append(T_1, T_2, axis=0)
-            wb_j_sorted = wb_j[:, wb_j[0, :].argsort()]
-            max_j = wb_j_sorted[1, -1]
+        max_j = np.argmax(w_b[d, :])
 
         IS_i.append(IS_ij[int(max_j)])
 
