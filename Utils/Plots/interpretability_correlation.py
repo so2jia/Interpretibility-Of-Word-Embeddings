@@ -7,6 +7,7 @@ from Utils.Loaders.semcat import read as semcat_reader, SemCat
 from Utils.Loaders.embedding import read as embedding_reader, Embedding
 from sklearn.preprocessing import normalize
 import os
+from tqdm import trange
 
 import logging
 logging.basicConfig(level=logging.DEBUG,
@@ -61,8 +62,7 @@ def anderson(x: np.ndarray):
     return anderson, p_values
 
 
-def interpretability_score(e_s: np.ndarray, w_b: np.ndarray, embedding: Embedding, semcat: SemCat, lamb=5, norm=False):
-    logging.info("Calculating interpretability...")
+def interpretability_score(w_b: np.ndarray, embedding: Embedding, semcat: SemCat, lamb=5, norm=False):
 
     IS_i = []
 
@@ -143,31 +143,66 @@ def test(input_file: str, bhatta: str, test_type: str, embedding_path: str, semc
     e_s = np.load(input_file)
     w_b = np.load(bhatta)
 
+    # running test
     val, p, name = test_types[test_type](e_s)
-    score = interpretability_score(e_s, w_b, embedding, semcat, norm=params["norm"])
+
+    # calculating interpretability scores
+    IS = []
+    score = np.array([0])
+
+    logging.info("Calculating interpretability...")
+    for i in trange(1, params["lambda"]+1):
+        score = interpretability_score(w_b, embedding, semcat, norm=params["norm"], lamb=i)
+        IS.append(sum(score)/score.shape[0])
 
     correlate = stats.pearsonr(score, p)
+    output_file = None
 
-    path = params["output_file"].split('/')
-    fp = path[-1].split('.')[0:-1]
-    dir_path = ""
-    for x in path[:-1]:
-        dir_path.join(x)
+    if params["output_file"] is not None:
+        # Path directory list
+        path = params["output_file"].split('/')
+        # splitted file name
+        fp = path[-1].split('.')[0:-1]
 
-    fname = ""
-    for x in fp:
-        fname.join(x)
+        # rejoining file name part without the extension
+        fname = ""
+        for x in fp:
+            fname = fname.join(x)
 
-    fname.join("-stats.txt")
+        # creating directories
+        os_path = os.getcwd()
+        for dir in path[:-1]:
+            os_path = os.path.join(os_path, dir)
+            if not os.path.exists(os_path):
+                os.mkdir(os_path)
 
-    p = os.path.join(dir_path, fname)
-    with open(p, mode="w", encoding="utf8") as f:
-        f.write(f"# Pearson (R, P)\n{correlate}\n# IS\n{sum(score)/score.shape[0]}")
+        # formating stats file name
+        # getting original extension
+        extension = path[-1].split('.')[-1]
+        # formating output file name
+        output_file = "" + fname + "_"
+        output_file += str(params['lambda'])
+        output_file += '-norm' if params['norm'] else ''
+        output_file += '.'
+        output_file += extension
+
+        f_name = "" + fname + "_"
+        f_name += str(params['lambda'])
+        f_name += '-norm' if params['norm'] else ''
+        f_name += "-stats.txt"
+
+        # creating stats file complete path
+        pp = os.path.join(os_path, f_name)
+        # writing to file
+        with open(pp, mode="w", encoding="utf8") as f:
+            f.write(f"# Pearson (R, P)\n{correlate}\n# IS\n")
+            for s in IS:
+                f.write(f"{s}\n")
 
     logging.info(f"Pearson r: {correlate}")
     logging.info(f"IS':{sum(score)/score.shape[0]}")
 
-    plotting(score, val, p, name, params["output_file"])
+    plotting(score, val, p, name, os.path.join(os_path, output_file) if params["output_file"] is not None else None)
 
 
 def plotting(dim, ks, p, name, output):
@@ -209,14 +244,16 @@ if __name__ == '__main__':
                         help="SemCat Categories dir")
     parser.add_argument("test_type", type=str,
                         help="Test types: [ks, normal, shapiro]")
-    parser.add_argument("-norm", type=bool,
+    parser.add_argument("-norm", action='store_true',
                         help="l2 norm of embedding space")
-    parser.add_argument("-dense", type=bool,
+    parser.add_argument("-dense", action='store_true',
                         help="Dense embedding")
+    parser.add_argument("--lamb", type=int, default=10,
+                        help="Relaxation variable for calculating interpretability score")
     parser.add_argument("--line_to_read", type=int, default=50000,
                         help="Maximum line to read from embedding file")
     parser.add_argument("--output_file", type=str,
-                        help="Output PNG file (Optional)")
+                        help="Output PNG file")
 
     args = parser.parse_args()
 
@@ -227,14 +264,16 @@ if __name__ == '__main__':
     test_type = args.test_type
     norm = args.norm
     dense = args.dense
+    lamb = args.lamb
     line_to_read = args.line_to_read
     output_file = args.output_file
 
     params = {
         "norm": False if norm is None else norm,
         "dense": False if dense is None else dense,
+        "lambda": lamb,
         "lines_to_read": line_to_read,
-        "output_file": output_file
+        "output_file": output_file,
     }
 
     test(input_file=embedding_s, bhatta=bhatta, test_type=test_type, embedding_path=embedding, semcat_dir=semcat_dir,
