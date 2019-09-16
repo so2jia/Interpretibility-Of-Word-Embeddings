@@ -6,8 +6,10 @@ from argparse import ArgumentParser
 from Utils.Loaders.semcat import read as semcat_reader, SemCat
 from Utils.Loaders.embedding import read as embedding_reader, Embedding
 from sklearn.preprocessing import normalize
+from sklearn.preprocessing import StandardScaler
 import os
 from tqdm import trange
+from Eval.glove_funcs import score_2 as interpretability
 
 import logging
 logging.basicConfig(level=logging.DEBUG,
@@ -62,48 +64,6 @@ def anderson(x: np.ndarray):
     return anderson, p_values
 
 
-def interpretability_score(w_b: np.ndarray, embedding: Embedding, semcat: SemCat, lamb=5, norm=False):
-
-    IS_i = []
-
-    D = embedding.W.shape[1]
-    K = semcat.i2c.__len__()
-
-    embedding_space = embedding.W
-
-    if norm:
-        embedding_space = normalize(embedding_space)
-
-    for d in range(D):
-        D_1 = np.array([embedding_space[:, d]])
-        D_2 = np.array([np.arange(D_1.shape[1])])
-        di = np.append(D_1, D_2, axis=0)
-        di_sorted = di[:, di[0, :].argsort()]
-
-        IS_ij = []
-
-        for j in range(K):
-            S = set(semcat.vocab[semcat.i2c[j]])
-            n_j = semcat.vocab[semcat.i2c[j]].__len__()
-
-            V_p = set([embedding.i2w[int(o)] for o in di_sorted[1, -lamb * n_j:]])
-            V_n = set([embedding.i2w[int(o)] for o in di_sorted[1, :lamb * n_j]])
-
-            IS_p = S.intersection(V_p).__len__() / n_j * 100
-            IS_n = S.intersection(V_n).__len__() / n_j * 100
-
-            # The max of positive and negative direction
-            IS_b = max(IS_p, IS_n)
-
-            IS_ij.append(IS_b)
-
-        max_j = np.argmax(w_b[d, :])
-
-        IS_i.append(IS_ij[int(max_j)])
-
-    return np.array(IS_i)
-
-
 def test(input_file: str, bhatta: str, test_type: str, embedding_path: str, semcat_dir: str, params: dict):
     """
     Normality test and interpretability score correlation
@@ -152,10 +112,10 @@ def test(input_file: str, bhatta: str, test_type: str, embedding_path: str, semc
 
     logging.info("Calculating interpretability...")
     for i in trange(1, params["lambda"]+1):
-        score = interpretability_score(w_b, embedding, semcat, norm=params["norm"], lamb=i)
+        score = interpretability.dimensional_score(embedding.W, embedding, semcat, w_b, norm=params["norm"], lamb=i)
         IS.append(sum(score)/score.shape[0])
 
-    correlate = stats.pearsonr(score, p)
+    correlate = stats.pearsonr(score, val)
     output_file = None
 
     if params["output_file"] is not None:
