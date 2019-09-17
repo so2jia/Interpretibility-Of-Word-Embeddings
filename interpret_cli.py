@@ -1,4 +1,4 @@
-from Eval.glove import Glove
+from Eval.interpretability import Glove
 
 from argparse import ArgumentParser
 

@@ -45,7 +45,7 @@ glove_cli.py <embedding_path> <semcat_dir>
     - \[bool \] <- Save result into file. Optional: Default False.
 
 **Example:**<br>
-`python glove_cli.py "data/glove/glove.6B.300d.txt"
+`python interpret_cli.py "data/glove/glove.6B.300d.txt"
 "data/semcat/Categories"
 -dense_file
 --lines_to_read=50000

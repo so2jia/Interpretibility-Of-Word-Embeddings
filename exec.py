@@ -1,4 +1,4 @@
-from Eval.glove import Glove
+from Eval.interpretability import Glove
 import numpy as np
 
 embedding_path = "data/glove/glove.6B.300d.txt"

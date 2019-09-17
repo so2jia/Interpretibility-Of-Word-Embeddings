@@ -7,7 +7,7 @@ from Utils.Loaders.semcat import read as semcat_reader
 from Utils.Loaders.embedding import read as embedding_reader
 import os
 from tqdm import trange
-from Eval.glove_funcs import score_2 as interpretability
+from Eval.glove_funcs import is_v2 as interpretability
 
 import logging
 logging.basicConfig(level=logging.DEBUG,

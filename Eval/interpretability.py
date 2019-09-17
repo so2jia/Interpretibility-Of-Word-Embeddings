@@ -1,7 +1,7 @@
 from Utils.Loaders import embedding as loader
 from Utils.Loaders import semcat as sc
 from Eval.glove_funcs.bhattacharya import bhattacharya_matrix
-from Eval.glove_funcs.score import score
+from Eval.glove_funcs.is_original import score
 from Utils.Loaders.embedding import Embedding
 
 from sklearn.preprocessing import StandardScaler
