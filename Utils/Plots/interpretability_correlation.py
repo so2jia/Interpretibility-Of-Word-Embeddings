@@ -3,10 +3,8 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import scipy.stats as stats
 from argparse import ArgumentParser
-from Utils.Loaders.semcat import read as semcat_reader, SemCat
-from Utils.Loaders.embedding import read as embedding_reader, Embedding
-from sklearn.preprocessing import normalize
-from sklearn.preprocessing import StandardScaler
+from Utils.Loaders.semcat import read as semcat_reader
+from Utils.Loaders.embedding import read as embedding_reader
 import os
 from tqdm import trange
 from Eval.glove_funcs import score_2 as interpretability

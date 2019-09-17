@@ -50,7 +50,6 @@ def dimensional_score(embedding_space: np.ndarray, embedding: Embedding, semcat:
     if norm:
         embedding_space = normalize(embedding_space)
     for i in range(D):
-
         IS_i.append(is_ij_(i, distance_space, embedding_space, embedding, semcat, lamb=lamb))
     return np.array(IS_i)
 

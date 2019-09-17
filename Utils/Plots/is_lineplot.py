@@ -4,14 +4,14 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-paths = [["interpret_w_b_10-stats.txt", "W_b"],
-         ["interpret_w_nb_10-stats.txt", "W_nb"],
-         ["interpret_w_nsb_10-stats.txt", "W_nsb"],
-         ["interpret_w_b_10-norm-stats.txt", "W_b norm"],
-         ["interpret_w_nb_10-norm-stats.txt", "W_nb norm"],
-         ["interpret_w_nsb_10-norm-stats.txt", "W_nsb norm"]]
+paths = [["cor_val_interpret_w_b_10-stats.txt", "W_b"],
+         ["cor_val_interpret_w_nb_10-stats.txt", "W_nb"],
+         ["cor_val_interpret_w_nsb_10-stats.txt", "W_nsb"],
+         ["cor_val_interpret_w_b_10-norm-stats.txt", "W_b norm"],
+         ["cor_val_interpret_w_nb_10-norm-stats.txt", "W_nb norm"],
+         ["cor_val_interpret_w_nsb_10-norm-stats.txt", "W_nsb norm"]]
 
-prefix = "../../out/test_data"
+prefix = "../../out/I_correlation_tests"
 
 base_path = os.path.join(os.getcwd(), prefix)
 

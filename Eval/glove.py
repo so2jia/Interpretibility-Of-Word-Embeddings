@@ -2,6 +2,7 @@ from Utils.Loaders import embedding as loader
 from Utils.Loaders import semcat as sc
 from Eval.glove_funcs.bhattacharya import bhattacharya_matrix
 from Eval.glove_funcs.score import score
+from Utils.Loaders.embedding import Embedding
 
 from sklearn.preprocessing import StandardScaler
 
@@ -113,8 +114,19 @@ class Glove:
             np.save(os.path.join(prefix, 'w_nb.npy'), W_nb)
             np.save(os.path.join(prefix, 'w_nsb.npy'), W_nsb)
             np.save(os.path.join(prefix, 'e_s.npy'), epsilon_s)
+            self._save_embedding(I, self.embedding, prefix)
 
         self.output = I
+
+    @classmethod
+    def _save_embedding(cls, I: np.ndarray, embedding: Embedding, prefix):
+        with open(os.path.join(prefix, 'I.embedding.100d.txt'), mode='w', encoding='utf8') as f:
+            for i in range(I.shape[0]):
+                f.write(f"{embedding.i2w[i]}")
+                for j in range(I.shape[1]):
+                    f.write(f" {I[i, j]}")
+                f.write("\n")
+
 
     def calculate_score(self, lamb=1):
         if type(lamb) != int:

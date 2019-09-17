@@ -30,7 +30,7 @@ if __name__ == '__main__':
     # Validation
     parser.add_argument("--calculate", type=str, required=False, default="score",
                         help="[score|decomp]")
-    parser.add_argument("--calculation_args", nargs='*', required=False, default=1,
+    parser.add_argument("--calculation_args", type=list, nargs='*', required=False, default=[],
                         help='''\
                             Takes calculation arguments:
                             score:
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     # Validation
     calculate = args.calculate
-    calculation_args = args.calculation_args
+    calculation_args = [] if args.calculation_args is None else args.calculation_args
 
     embedding_params = {
         "input_file": embedding_path,
