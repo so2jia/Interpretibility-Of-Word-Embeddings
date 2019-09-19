@@ -1,14 +1,11 @@
 from Utils.Loaders import embedding as loader
 from Utils.Loaders import semcat as sc
-from Eval.glove_funcs.bhattacharya import bhattacharya_matrix
-from Eval.glove_funcs.is_original import score
+from Eval.InterpretabilityFunctions.is_original import score
 from Utils.Loaders.embedding import Embedding
 
-from sklearn.preprocessing import StandardScaler
+from Eval.InterpretabilityFunctions.bhattacharya import bhattacharya_matrix
 
 import numpy as np
-from numpy import ndarray
-from argparse import ArgumentParser
 import os
 import logging
 logging.basicConfig(level=logging.DEBUG,
@@ -88,35 +85,37 @@ class Glove:
             logging.info("Wrong calculation type provided or not provided at all!")
 
     def _eval(self):
+
+
         # Calculating Bhattacharya distance
         W_b, W_bs = bhattacharya_matrix(**self.eval_params)
-
-        # Normalized matrix
-        logging.info("Normalizing Bhattacharya matrix...")
-        W_nb = W_b / np.linalg.norm(W_b, 1, axis=0)
-
-        # Sign corrected matrix
-        logging.info("Performing sign correction...")
-        W_nsb = W_nb * W_bs
-
-        # Standardize epsilon
-        logging.info("Standardising embedding vectors...")
-        scaler = StandardScaler(copy=True, with_mean=True, with_std=True)
-        scaler.fit(self.embedding.W)
-        epsilon_s = scaler.transform(self.embedding.W)
-
-        # Calculating
-        I = epsilon_s.dot(W_nsb)
-
-        if self.eval_params["save_weights"]:
-            prefix = os.path.join(os.getcwd(), self.eval_params["weights_dir"])
-            np.save(os.path.join(prefix, 'I.npy'), I)
-            np.save(os.path.join(prefix, 'w_nb.npy'), W_nb)
-            np.save(os.path.join(prefix, 'w_nsb.npy'), W_nsb)
-            np.save(os.path.join(prefix, 'e_s.npy'), epsilon_s)
-            self._save_embedding(I, self.embedding, prefix)
-
-        self.output = I
+        #
+        # # Normalized matrix
+        # logging.info("Normalizing Bhattacharya matrix...")
+        # W_nb = W_b / np.linalg.norm(W_b, 1, axis=0)
+        #
+        # # Sign corrected matrix
+        # logging.info("Performing sign correction...")
+        # W_nsb = W_nb * W_bs
+        #
+        # # Standardize epsilon
+        # logging.info("Standardising embedding vectors...")
+        # scaler = StandardScaler(copy=True, with_mean=True, with_std=True)
+        # scaler.fit(self.embedding.W)
+        # epsilon_s = scaler.transform(self.embedding.W)
+        #
+        # # Calculating
+        # I = epsilon_s.dot(W_nsb)
+        #
+        # if self.eval_params["save_weights"]:
+        #     prefix = os.path.join(os.getcwd(), self.eval_params["weights_dir"])
+        #     np.save(os.path.join(prefix, 'I.npy'), I)
+        #     np.save(os.path.join(prefix, 'w_nb.npy'), W_nb)
+        #     np.save(os.path.join(prefix, 'w_nsb.npy'), W_nsb)
+        #     np.save(os.path.join(prefix, 'e_s.npy'), epsilon_s)
+        #     self._save_embedding(I, self.embedding, prefix)
+        #
+        self.output = None
 
     @classmethod
     def _save_embedding(cls, I: np.ndarray, embedding: Embedding, prefix):

@@ -4,6 +4,12 @@ import sys
 import numpy as np
 from Utils.Loaders.embedding import Embedding
 from Utils.Loaders.semcat import SemCat
+from sklearn.neighbors import KernelDensity
+
+from scipy.integrate import quad
+import seaborn
+
+import matplotlib.pyplot as plt
 
 import logging
 logging.basicConfig(level=logging.DEBUG,
@@ -25,19 +31,36 @@ def bhatta_distance(p: np.ndarray, q: np.ndarray):
     tuple
         Returns with the distance and the sign of the difference of means
     """
-    # Variance of p and q
-    var1 = np.std(p) ** 2
-    var2 = np.std(q) ** 2
 
-    # Mean of p and q
-    mean1 = np.mean(p)
-    mean2 = np.mean(q)
+    kde = KernelDensity(bandwidth=0.2, kernel='gaussian')
 
-    # Formula
-    x = np.log1p((var1 / var2 + var2 / var1 + 2) / 4) / 4
-    bc = x + ((mean1 - mean2) ** 2 / (var1 + var2)) / 4
-    sign = -1 if mean1 - mean2 < 0 else 1
-    return bc, sign
+    if type(p) == float:
+        p = np.array([p])
+
+    if type(q) == float:
+        q = np.array([q])
+
+    smp = np.linspace(-1.5, 1.2, 1000000)[:, np.newaxis]
+
+    _p = p[:, np.newaxis]
+    p_kde_fit = kde.fit(_p)
+    p_kde_score = p_kde_fit.score_samples(smp)
+
+    plt.plot(smp[:, 0], np.exp(p_kde_score))
+    # plt.plot(p, np.arange(p.shape[0]))
+    # seaborn.kdeplot(p)
+    plt.show()
+
+    _q = q[:, np.newaxis]
+    q_kde_fit = kde.fit(_q)
+    q_kde_score = q_kde_fit.score_samples(smp)
+
+
+    f = lambda x, a, b: np.sqrt(a*x*b*x)
+
+    ig = quad(f, -np.inf, np.inf, args=(p_kde_score, q_kde_score))
+
+    return ig
 
 
 def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int,
@@ -66,7 +89,8 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
     W_b = np.zeros([embedding.W.shape[1], category_size], dtype=np.float)
     W_bs = np.zeros([embedding.W.shape[1], category_size], dtype=np.int)
 
-    for i in dimension_indexes:
+    # TODO restore iteration
+    for i in [dimension_indexes[0]]:
         for j in range(category_size):
             word_indexes = np.zeros(shape=[embedding.W.shape[0], ], dtype=np.bool)
             _p = []
@@ -81,14 +105,13 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
             # Populate Q with out of category word weights
             _q = embedding.W[~word_indexes, i]
             # calculating distance
-            b, s = bhatta_distance(_p, _q)
+
+            b = bhatta_distance(_p, _q)
 
             # distance
             W_b[i][j] = b
-            # sign
-            W_bs[i][j] = s
     logging.info(f"Bhattacharya matrix: slice #{id}/{max_id} calculated...")
-    return W_b, W_bs
+    return W_b, None
 
 
 def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, weights_dir="out", save_weights=False, load_weights=True):
