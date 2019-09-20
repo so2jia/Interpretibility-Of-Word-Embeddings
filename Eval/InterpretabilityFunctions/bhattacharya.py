@@ -1,5 +1,6 @@
 import os
 import sys
+import tqdm
 
 import numpy as np
 from Utils.Loaders.embedding import Embedding
@@ -32,35 +33,43 @@ def bhatta_distance(p: np.ndarray, q: np.ndarray):
         Returns with the distance and the sign of the difference of means
     """
 
-    kde = KernelDensity(bandwidth=0.2, kernel='gaussian')
-
     if type(p) == float:
         p = np.array([p])
 
     if type(q) == float:
         q = np.array([q])
 
-    smp = np.linspace(-1.5, 1.2, 1000000)[:, np.newaxis]
+    # smp = np.linspace(-1.5, 1.2, 1000000)[:, np.newaxis]
 
+    # plt.plot(smp[:, 0], r)
+    # plt.plot(smp[:, 0], e_p)
+    # plt.plot(smp[:, 0], e_q)
+    # # plt.plot(p, np.arange(p.shape[0]))
+    # # seaborn.kdeplot(p)
+    # plt.show()
+
+    p_kde = KernelDensity(bandwidth=0.2, kernel='gaussian')
+    q_kde = KernelDensity(bandwidth=0.2, kernel='gaussian')
     _p = p[:, np.newaxis]
-    p_kde_fit = kde.fit(_p)
-    p_kde_score = p_kde_fit.score_samples(smp)
-
-    plt.plot(smp[:, 0], np.exp(p_kde_score))
-    # plt.plot(p, np.arange(p.shape[0]))
-    # seaborn.kdeplot(p)
-    plt.show()
+    p_kde_fit = p_kde.fit(_p)
 
     _q = q[:, np.newaxis]
-    q_kde_fit = kde.fit(_q)
-    q_kde_score = q_kde_fit.score_samples(smp)
+    q_kde_fit = q_kde.fit(_q)
 
+    def g(x, __p, __q):
+        p_kde_score = __p.score_samples(np.array([[x]]))
 
-    f = lambda x, a, b: np.sqrt(a*x*b*x)
+        q_kde_score = __q.score_samples(np.array([[x]]))
 
-    ig = quad(f, -np.inf, np.inf, args=(p_kde_score, q_kde_score))
+        e_p = np.exp(p_kde_score)
+        e_q = np.exp(q_kde_score)
 
-    return ig
+        r = np.sqrt(e_p * e_q)
+        return r
+
+    ig = quad(g, -np.inf, np.inf, args=(p_kde_fit, q_kde_fit))
+
+    return -np.log1p(ig[0])
 
 
 def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int,
@@ -87,11 +96,9 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
 
     """
     W_b = np.zeros([embedding.W.shape[1], category_size], dtype=np.float)
-    W_bs = np.zeros([embedding.W.shape[1], category_size], dtype=np.int)
 
-    # TODO restore iteration
-    for i in [dimension_indexes[0]]:
-        for j in range(category_size):
+    for i in tqdm.tqdm(dimension_indexes):
+        for j in tqdm.trange(category_size):
             word_indexes = np.zeros(shape=[embedding.W.shape[0], ], dtype=np.bool)
             _p = []
             _q = []
@@ -167,7 +174,8 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, weights_dir="out",
 
     for slice in slices:
         W_b += np.array(slice[0])
-        W_bs += np.array(slice[1])
+        if slice[1] is not None:
+            W_bs += np.array(slice[1])
 
     # Saving matrix
     if save_weights:
