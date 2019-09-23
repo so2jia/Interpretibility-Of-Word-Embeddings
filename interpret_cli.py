@@ -1,8 +1,9 @@
 from Eval.interpretability import Glove
-
+from multiprocessing import freeze_support
 from argparse import ArgumentParser
 
 if __name__ == '__main__':
+    freeze_support()  # for Windows support
     parser = ArgumentParser(description='Glove interpretibility')
 
     # Required parameters

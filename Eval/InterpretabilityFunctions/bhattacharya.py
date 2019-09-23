@@ -95,8 +95,11 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
     """
     W_b = np.zeros([embedding.W.shape[1], category_size], dtype=np.float)
 
-    for i in tqdm.tqdm(dimension_indexes, unit='dim'):
-        for j in range(category_size):
+    # TODO reduce the number of progress bars
+
+    for k in tqdm.trange(dimension_indexes.__len__(), unit='dim', desc=f'__ On PID - {os.getpid()}\t'):
+        i = dimension_indexes[k]
+        for j in tqdm.trange(category_size, desc=f'>> On PID - {os.getpid()}\t'):
             word_indexes = np.zeros(shape=[embedding.W.shape[0], ], dtype=np.bool)
             _p = []
             _q = []
@@ -115,7 +118,7 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
 
             # distance
             W_b[i][j] = b
-        print('', sep='', end='')
+
     logging.info(f"Bhattacharya matrix: slice #{id}/{max_id} calculated...")
     return W_b, None
 
