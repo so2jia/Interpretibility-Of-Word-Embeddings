@@ -30,7 +30,7 @@ if __name__ == '__main__':
     # Validation
     parser.add_argument("--calculate", type=str, required=False, default="score",
                         help="[score|decomp]")
-    parser.add_argument("--calculation_args", type=list, nargs='*', required=False, default=[],
+    parser.add_argument("--calculation_args", nargs='*', required=False, default=[],
                         help='''\
                             Takes calculation arguments:
                             score:

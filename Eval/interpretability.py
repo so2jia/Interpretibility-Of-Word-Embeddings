@@ -78,7 +78,8 @@ class Glove:
         if embedding_params["dense_file"]:
             self._eval()
         else:
-            logging.info("Sparse model is not implemented yet!")
+            # TODO On merge sparse call here
+            self._eval()
 
         if calculation_type in self.calc_types.keys():
             self.calc_types[calculation_type](*calculation_args)
@@ -93,10 +94,6 @@ class Glove:
         logging.info("Normalizing Bhattacharya matrix...")
         W_nb = W_b / np.linalg.norm(W_b, 1, axis=0)
 
-        # Sign corrected matrix
-        logging.info("Performing sign correction...")
-        W_nsb = W_nb * W_bs
-
         # Standardize epsilon
         logging.info("Standardising embedding vectors...")
         scaler = StandardScaler(copy=True, with_mean=True, with_std=True)
@@ -104,13 +101,12 @@ class Glove:
         epsilon_s = scaler.transform(self.embedding.W)
 
         # Calculating
-        I = epsilon_s.dot(W_nsb)
+        I = epsilon_s.dot(W_nb)
 
         if self.eval_params["save_weights"]:
             prefix = os.path.join(os.getcwd(), self.eval_params["weights_dir"])
             np.save(os.path.join(prefix, 'I.npy'), I)
             np.save(os.path.join(prefix, 'w_nb.npy'), W_nb)
-            np.save(os.path.join(prefix, 'w_nsb.npy'), W_nsb)
             np.save(os.path.join(prefix, 'e_s.npy'), epsilon_s)
             self._save_embedding(I, self.embedding, prefix)
 
