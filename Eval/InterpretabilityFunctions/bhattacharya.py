@@ -8,9 +8,7 @@ from Utils.Loaders.semcat import SemCat
 from sklearn.neighbors import KernelDensity
 
 from scipy.integrate import quad
-import seaborn
-
-import matplotlib.pyplot as plt
+import multiprocessing
 
 import logging
 logging.basicConfig(level=logging.DEBUG,
@@ -97,8 +95,8 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
     """
     W_b = np.zeros([embedding.W.shape[1], category_size], dtype=np.float)
 
-    for i in tqdm.tqdm(dimension_indexes):
-        for j in tqdm.trange(category_size):
+    for i in tqdm.tqdm(dimension_indexes, unit='dim'):
+        for j in range(category_size):
             word_indexes = np.zeros(shape=[embedding.W.shape[0], ], dtype=np.bool)
             _p = []
             _q = []
@@ -117,11 +115,14 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
 
             # distance
             W_b[i][j] = b
+        print('', sep='', end='')
     logging.info(f"Bhattacharya matrix: slice #{id}/{max_id} calculated...")
     return W_b, None
 
 
-def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, weights_dir="out", save_weights=False, load_weights=True):
+def bhattacharya_matrix(embedding: Embedding, semcat: SemCat,
+                        weights_dir="out", save_weights=False, load_weights=True,
+                        processes=2):
     """
     Calculating Bhattacharya distance matrix
     Parameters
@@ -162,7 +163,7 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, weights_dir="out",
         return W_b, W_bs
 
     # Calculating distance matrix
-    number_of_slices = 4
+    number_of_slices = processes
 
     d = W_b.shape[0]
 
@@ -170,12 +171,23 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, weights_dir="out",
 
     indexes = [[i for i in range(int(d/number_of_slices*p), int(d/number_of_slices*(p+1)))] for p in range(number_of_slices)]
 
-    slices = [calculation_process(embedding, semcat, W_b.shape[1], i, k+1, len(indexes)) for k, i in enumerate(indexes)]
+    slices = [
+        [embedding,
+         semcat,
+         W_b.shape[1],
+         i,
+         k+1,
+         len(indexes)]
+        for k, i in enumerate(indexes)
+    ]
 
-    for slice in slices:
-        W_b += np.array(slice[0])
-        if slice[1] is not None:
-            W_bs += np.array(slice[1])
+    with multiprocessing.Pool(number_of_slices) as pool:
+        result = pool.starmap(calculation_process, slices)
+
+    for slc in result:
+        W_b += np.array(slc[0])
+        if slc[1] is not None:
+            W_bs += np.array(slc[1])
 
     # Saving matrix
     if save_weights:
