@@ -29,7 +29,8 @@ if __name__ == '__main__':
                         help="Flag whether you want to load the matrices")
     parser.add_argument("--processes", type=int, required=False, default=2,
                         help="The number of processes to initiate for calculations")
-
+    parser.add_argument("--name", type=str, required=False, default="default",
+                        help="A prefix for the output files")
 
     # Validation
     parser.add_argument("--calculate", type=str, required=False, default="score",
@@ -78,7 +79,8 @@ if __name__ == '__main__':
         "weights_dir": weights_dir,
         "save_weights": save_weights,
         "load_weights": load_weights,
-        "processes": args.processes
+        "processes": args.processes,
+        "name": args.name
     }
     model = Glove(embedding_params=embedding_params, semcat_dir=semcat_dir,
                   eval_params=eval_params,

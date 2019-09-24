@@ -125,7 +125,7 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
 
 def bhattacharya_matrix(embedding: Embedding, semcat: SemCat,
                         weights_dir="out", save_weights=False, load_weights=True,
-                        processes=2):
+                        processes=2, name="default"):
     """
     Calculating Bhattacharya distance matrix
     Parameters
@@ -158,9 +158,9 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat,
             sys.exit(1)
 
         # Distance matrix
-        W_b = np.load(os.path.join(prefix, '/w_b.npy'))
+        W_b = np.load(os.path.join(prefix, f'/{name}_w_b.npy'))
         # Distance matrix signs
-        W_bs = np.load(os.path.join(prefix, '/w_bs.npy'))
+        W_bs = np.load(os.path.join(prefix, f'/{name}_w_bs.npy'))
 
         logging.info("Bhattacharya distance matrix loaded!")
         return W_b, W_bs
@@ -195,8 +195,8 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat,
     # Saving matrix
     if save_weights:
         prefix = os.path.join(os.getcwd(), weights_dir)
-        dest = os.path.join(prefix, 'w_b.npy')
+        dest = os.path.join(prefix, f'{name}_w_b.npy')
         np.save(dest, W_b)
-        np.save(os.path.join(prefix, 'w_bs.npy'), W_bs)
+        np.save(os.path.join(prefix, f'{name}_w_bs.npy'), W_bs)
 
     return W_b, W_bs

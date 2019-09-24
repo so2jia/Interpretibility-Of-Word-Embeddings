@@ -17,7 +17,8 @@ glove_cli.py <embedding_path> <semcat_dir>
              [-h] [-dense_file] [--lines_to_read LINES_TO_READ]
                   [--mcrae_dir MCRAE_DIR] [-mcrae_words_only]
                   [--weights_dir WEIGHTS_DIR] [-save_weights]
-                  [-load_weights] [--processes PROCESSES] [--calculate CALCULATE]
+                  [-load_weights] [--processes PROCESSES] 
+                  [--name NAME] [--calculate CALCULATE]
                   [--calculation_args [CALCULATION_ARGS [CALCULATION_ARGS ...]]]
 `
 
@@ -35,6 +36,7 @@ glove_cli.py <embedding_path> <semcat_dir>
 - **save_weights** - Save weights to weights_dir
 - **load_weights** - Load weights from weights_dir
 - **processes** - The number of processes to initiate for calculations
+- **name** - The prefix of the output files
 ##### **validation related parameters**
 - **calculate** - Calculation method \[_score_|_decomp_\]
 - **calculation_args** - List of arguments for calculation:

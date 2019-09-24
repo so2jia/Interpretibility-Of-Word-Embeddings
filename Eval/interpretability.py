@@ -105,9 +105,9 @@ class Glove:
 
         if self.eval_params["save_weights"]:
             prefix = os.path.join(os.getcwd(), self.eval_params["weights_dir"])
-            np.save(os.path.join(prefix, 'I.npy'), I)
-            np.save(os.path.join(prefix, 'w_nb.npy'), W_nb)
-            np.save(os.path.join(prefix, 'e_s.npy'), epsilon_s)
+            np.save(os.path.join(prefix, f'{self.eval_params["name"]}_I.npy'), I)
+            np.save(os.path.join(prefix, f'{self.eval_params["name"]}_w_nb.npy'), W_nb)
+            np.save(os.path.join(prefix, f'{self.eval_params["name"]}_e_s.npy'), epsilon_s)
             self._save_embedding(I, self.embedding, prefix)
 
         self.output = I
