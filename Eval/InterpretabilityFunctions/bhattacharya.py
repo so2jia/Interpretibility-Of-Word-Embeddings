@@ -37,14 +37,9 @@ def bhatta_distance(p: np.ndarray, q: np.ndarray):
     if type(q) == float:
         q = np.array([q])
 
-    # smp = np.linspace(-1.5, 1.2, 1000000)[:, np.newaxis]
-
-    # plt.plot(smp[:, 0], r)
-    # plt.plot(smp[:, 0], e_p)
-    # plt.plot(smp[:, 0], e_q)
-    # # plt.plot(p, np.arange(p.shape[0]))
-    # # seaborn.kdeplot(p)
-    # plt.show()
+    # Mean of p and q
+    mean1 = np.mean(p)
+    mean2 = np.mean(q)
 
     p_kde = KernelDensity(bandwidth=0.2, kernel='gaussian')
     q_kde = KernelDensity(bandwidth=0.2, kernel='gaussian')
@@ -67,7 +62,7 @@ def bhatta_distance(p: np.ndarray, q: np.ndarray):
 
     ig = quad(g, -np.inf, np.inf, args=(p_kde_fit, q_kde_fit))
 
-    return -np.log1p(ig[0])
+    return -np.log1p(ig[0]), -1 if mean1 - mean2 < 0 else 1
 
 
 def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int,
@@ -94,6 +89,7 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
 
     """
     W_b = np.zeros([embedding.W.shape[1], category_size], dtype=np.float)
+    W_bs = np.zeros([embedding.W.shape[1], category_size], dtype=np.int)
 
     # TODO reduce the number of progress bars
 
@@ -114,13 +110,14 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
             _q = embedding.W[~word_indexes, i]
             # calculating distance
 
-            b = bhatta_distance(_p, _q)
+            b, s = bhatta_distance(_p, _q)
 
             # distance
             W_b[i][j] = b
+            W_bs[i][j] = s
 
     logging.info(f"Bhattacharya matrix: slice #{id}/{max_id} calculated...")
-    return W_b, None
+    return W_b, W_bs
 
 
 def bhattacharya_matrix(embedding: Embedding, semcat: SemCat,
@@ -189,8 +186,7 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat,
 
     for slc in result:
         W_b += np.array(slc[0])
-        if slc[1] is not None:
-            W_bs += np.array(slc[1])
+        W_bs += np.array(slc[1])
 
     # Saving matrix
     if save_weights:

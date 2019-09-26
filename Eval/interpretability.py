@@ -94,6 +94,9 @@ class Glove:
         logging.info("Normalizing Bhattacharya matrix...")
         W_nb = W_b / np.linalg.norm(W_b, 1, axis=0)
 
+        # Sign correction
+        W_nsb = W_nb * W_bs
+
         # Standardize epsilon
         logging.info("Standardising embedding vectors...")
         scaler = StandardScaler(copy=True, with_mean=True, with_std=True)
@@ -101,12 +104,13 @@ class Glove:
         epsilon_s = scaler.transform(self.embedding.W)
 
         # Calculating
-        I = epsilon_s.dot(W_nb)
+        I = epsilon_s.dot(W_nsb)
 
         if self.eval_params["save_weights"]:
             prefix = os.path.join(os.getcwd(), self.eval_params["weights_dir"])
             np.save(os.path.join(prefix, f'{self.eval_params["name"]}_I.npy'), I)
             np.save(os.path.join(prefix, f'{self.eval_params["name"]}_w_nb.npy'), W_nb)
+            np.save(os.path.join(prefix, f'{self.eval_params["name"]}_w_nsb.npy'), W_nsb)
             np.save(os.path.join(prefix, f'{self.eval_params["name"]}_e_s.npy'), epsilon_s)
             self._save_embedding(I, self.embedding, prefix)
 
