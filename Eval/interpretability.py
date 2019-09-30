@@ -112,13 +112,13 @@ class Glove:
             np.save(os.path.join(prefix, f'{self.eval_params["name"]}_w_nb.npy'), W_nb)
             np.save(os.path.join(prefix, f'{self.eval_params["name"]}_w_nsb.npy'), W_nsb)
             np.save(os.path.join(prefix, f'{self.eval_params["name"]}_e_s.npy'), epsilon_s)
-            self._save_embedding(I, self.embedding, prefix)
+            self._save_embedding(I, self.embedding, prefix, self.eval_params["name"])
 
         self.output = I
 
     @classmethod
-    def _save_embedding(cls, I: np.ndarray, embedding: Embedding, prefix):
-        with open(os.path.join(prefix, 'I.embedding.100d.txt'), mode='w', encoding='utf8') as f:
+    def _save_embedding(cls, I: np.ndarray, embedding: Embedding, prefix, name):
+        with open(os.path.join(prefix, f'{name}I.embedding.100d.txt'), mode='w', encoding='utf8') as f:
             for i in range(I.shape[0]):
                 f.write(f"{embedding.i2w[i]}")
                 for j in range(I.shape[1]):
