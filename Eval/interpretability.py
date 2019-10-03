@@ -118,7 +118,7 @@ class Glove:
 
     @classmethod
     def _save_embedding(cls, I: np.ndarray, embedding: Embedding, prefix, name):
-        with open(os.path.join(prefix, f'{name}I.embedding.100d.txt'), mode='w', encoding='utf8') as f:
+        with open(os.path.join(prefix, f'{name}_I.embedding.100d.txt'), mode='w', encoding='utf8') as f:
             for i in range(I.shape[0]):
                 f.write(f"{embedding.i2w[i]}")
                 for j in range(I.shape[1]):
