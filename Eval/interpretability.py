@@ -57,9 +57,13 @@ class Glove:
         if eval_params["load_weights"] is None:
             eval_params["load_weights"] = False
 
-        prefix = os.path.join(os.getcwd(), eval_params["weights_dir"])
-        if not os.path.exists(prefix):
-            os.mkdir(prefix)
+        path = eval_params["weights_dir"].split('/')
+
+        prefix = os.getcwd()
+        for dir in path[:-1]:
+            prefix = os.path.join(prefix, dir)
+            if not os.path.exists(prefix):
+                os.mkdir(prefix)
 
         # Reading files
         self.embedding = loader.read(**embedding_params)
