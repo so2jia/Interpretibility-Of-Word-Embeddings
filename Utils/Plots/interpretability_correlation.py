@@ -7,7 +7,7 @@ from Utils.Loaders.semcat import read as semcat_reader
 from Utils.Loaders.embedding import read as embedding_reader
 import os
 from tqdm import trange
-from Eval.InterpretabilityFunctions import is_v2_sparse as interpretability
+from Eval.InterpretabilityFunctions import is_v2_concept as interpretability
 
 import logging
 logging.basicConfig(level=logging.DEBUG,
@@ -102,7 +102,7 @@ def test(input_file: str, bhatta: str, test_type: str, embedding_path: str, semc
     w_b = np.load(bhatta)
 
     # running test
-    val, p, name = test_types[test_type](e_s)
+    # val, p, name = test_types[test_type](e_s)
 
     # calculating interpretability scores
     IS = []
@@ -110,10 +110,9 @@ def test(input_file: str, bhatta: str, test_type: str, embedding_path: str, semc
 
     logging.info("Calculating interpretability...")
     for i in trange(1, params["lambda"]+1):
-        score = interpretability.dimensional_score(embedding.W, embedding, semcat, w_b, norm=params["norm"], lamb=i)
-        IS.append(sum(score)/score.shape[0])
+        IS.append(interpretability.score(embedding.W, embedding, semcat, w_b, lamb=i, norm=params["norm"], avg=True))
 
-    correlate = stats.pearsonr(score, val)
+    # correlate = stats.pearsonr(score, val)
     output_file = None
 
     if params["output_file"] is not None:
@@ -123,9 +122,10 @@ def test(input_file: str, bhatta: str, test_type: str, embedding_path: str, semc
         fp = path[-1].split('.')[0:-1]
 
         # rejoining file name part without the extension
-        fname = ""
-        for x in fp:
-            fname = fname.join(x)
+        fname = path[-1].rstrip(".png")
+        # for x in fp:
+        #     fname = fname.join([x, "."])
+        # fname = fname.rstrip(".")
 
         # creating directories
         os_path = os.getcwd()
@@ -138,7 +138,7 @@ def test(input_file: str, bhatta: str, test_type: str, embedding_path: str, semc
         # getting original extension
         extension = path[-1].split('.')[-1]
         # formating output file name
-        output_file = "" + fname + "_"
+        output_file = fname + "_"
         output_file += str(params['lambda'])
         output_file += '-norm' if params['norm'] else ''
         output_file += '.'
@@ -153,14 +153,14 @@ def test(input_file: str, bhatta: str, test_type: str, embedding_path: str, semc
         pp = os.path.join(os_path, f_name)
         # writing to file
         with open(pp, mode="w", encoding="utf8") as f:
-            f.write(f"# Pearson (R, P)\n{correlate}\n# IS\n")
+            f.write(f"# Pearson (R, P)\n0\n# IS\n")
             for s in IS:
                 f.write(f"{s}\n")
 
-    logging.info(f"Pearson r: {correlate}")
+    # logging.info(f"Pearson r: {correlate}")
     logging.info(f"IS':{sum(score)/score.shape[0]}")
 
-    plotting(score, val, p, name, os.path.join(os_path, output_file) if params["output_file"] is not None else None)
+    # plotting(score, val, p, name, os.path.join(os_path, output_file) if params["output_file"] is not None else None)
 
 
 def plotting(dim, ks, p, name, output):
