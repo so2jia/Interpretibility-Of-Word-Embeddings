@@ -153,15 +153,30 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat,
 
 
 if __name__ == '__main__':
-    regul = "3"
-    emb = embreader(f"../../data/glove/sparse/glove300d_l_0.{regul}_DL_top50000.emb.gz", False, 50000)
+    regul = "5"
+    emb = embreader(f"../../data/glove/glove.6B.300d.txt", True, 50000)
     sm = smreader("../../data/semcat/Categories/")
 
-    bhattacharya_matrix(emb, sm, "../../out/", name=f"l_0.{regul}")
+    bhattacharya_matrix(emb, sm, "../../out/kde/dense_model/", name=f"raw")
 
-    w_nb = np.load(f"../../out/l_0.{regul}_w_nb.npy")
-    w_sb = np.load(f"../../out/l_0.{regul}_w_bs.npy")
+    w_nb = np.load(f"../../out/kde/dense_model/raw_w_nb.npy")
+    w_sb = np.load(f"../../out/kde/dense_model/raw_w_bs.npy")
 
-    w_nsb = w_nb*w_sb
+    w_nsb = w_nb * w_sb
 
-    np.save(f"../../out/l_0.{regul}_w_nsb.npy", w_nsb)
+    np.save(f"../../out/kde/dense_model/raw_w_nsb.npy", w_nsb)
+
+
+    # sparse
+    # regul = "5"
+    # emb = embreader(f"../../data/glove/sparse/glove300d_l_0.{regul}_DL_top50000.emb.gz", False, 50000)
+    # sm = smreader("../../data/semcat/Categories/")
+    #
+    # bhattacharya_matrix(emb, sm, "../../out/", name=f"l_0.{regul}")
+    #
+    # w_nb = np.load(f"../../out/kde/sparse_model/l_0.{regul}_w_nb.npy")
+    # w_sb = np.load(f"../../out/kde/sparse_model/l_0.{regul}_w_bs.npy")
+    #
+    # w_nsb = w_nb*w_sb
+    #
+    # np.save(f"../../out/kde/sparse_model/l_0.{regul}_w_nsb.npy", w_nsb)
