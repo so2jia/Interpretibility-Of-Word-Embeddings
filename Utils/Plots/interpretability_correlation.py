@@ -7,7 +7,7 @@ from Utils.Loaders.semcat import read as semcat_reader
 from Utils.Loaders.embedding import read as embedding_reader
 import os
 from tqdm import trange
-from Eval.glove_funcs import is_v2 as interpretability
+from Eval.InterpretabilityFunctions import is_concept as interpretability
 
 import logging
 logging.basicConfig(level=logging.DEBUG,
@@ -110,10 +110,10 @@ def test(input_file: str, bhatta: str, test_type: str, embedding_path: str, semc
 
     logging.info("Calculating interpretability...")
     for i in trange(1, params["lambda"]+1):
-        score = interpretability.dimensional_score(embedding.W, embedding, semcat, w_b, norm=params["norm"], lamb=i)
-        IS.append(sum(score)/score.shape[0])
+        score = interpretability.score(embedding.W, embedding, semcat, w_b, norm=params["norm"], lamb=i, avg=True)
+        IS.append(score)
 
-    correlate = stats.pearsonr(score, val)
+    # correlate = stats.pearsonr(score, val)
     output_file = None
 
     if params["output_file"] is not None:
@@ -153,14 +153,14 @@ def test(input_file: str, bhatta: str, test_type: str, embedding_path: str, semc
         pp = os.path.join(os_path, f_name)
         # writing to file
         with open(pp, mode="w", encoding="utf8") as f:
-            f.write(f"# Pearson (R, P)\n{correlate}\n# IS\n")
+            f.write(f"# Pearson (R, P)\n0\n# IS\n")
             for s in IS:
                 f.write(f"{s}\n")
 
-    logging.info(f"Pearson r: {correlate}")
-    logging.info(f"IS':{sum(score)/score.shape[0]}")
+    # logging.info(f"Pearson r: {correlate}")
+    logging.info(f"IS':{score}")
 
-    plotting(score, val, p, name, os.path.join(os_path, output_file) if params["output_file"] is not None else None)
+    # plotting(score, val, p, name, os.path.join(os_path, output_file) if params["output_file"] is not None else None)
 
 
 def plotting(dim, ks, p, name, output):

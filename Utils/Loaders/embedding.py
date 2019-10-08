@@ -148,8 +148,14 @@ class Embedding(object):
                         data.append(float(value))
                         indices.append(i)
                 indptr.append(len(indices))
-        w2i = {w:i for i,w in i2w.items()}
-        return w2i, i2w, sp.csr_matrix((data, indices, indptr), shape=(len(indptr)-1, i+1))
+        w2i = {w: i for i, w in i2w.items()}
+
+        sparse = sp.csr_matrix((data, indices, indptr), shape=(len(indptr) - 1, i + 1)).toarray()
+
+        sm = sparse.sum(axis=0) == 0
+        sparse = sparse[:, ~sm]
+
+        return w2i, i2w, sparse
 
     def query_by_index(self, idx, top_words=25000, top_k=10):
         assert type(self.W) == sp.csr_matrix  # this method only works for sparse matrices at the moment

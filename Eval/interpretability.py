@@ -1,7 +1,7 @@
 from Utils.Loaders import embedding as loader
 from Utils.Loaders import semcat as sc
-from Eval.glove_funcs.bhattacharya import bhattacharya_matrix
-from Eval.glove_funcs.is_original import score
+from Eval.InterpretabilityFunctions.bhattacharya import bhattacharya_matrix
+from Eval.InterpretabilityFunctions.is_original import score
 from Utils.Loaders.embedding import Embedding
 
 from sklearn.preprocessing import StandardScaler
@@ -59,9 +59,13 @@ class Glove:
         if eval_params["load_weights"] is None:
             eval_params["load_weights"] = False
 
-        prefix = os.path.join(os.getcwd(), eval_params["weights_dir"])
-        if not os.path.exists(prefix):
-            os.mkdir(prefix)
+        path = eval_params["weights_dir"].split('/')
+
+        prefix = os.getcwd()
+        for dir in path[:-1]:
+            prefix = os.path.join(prefix, dir)
+            if not os.path.exists(prefix):
+                os.mkdir(prefix)
 
         # Reading files
         self.embedding = loader.read(**embedding_params)
