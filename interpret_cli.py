@@ -85,7 +85,7 @@ if __name__ == '__main__':
         "processes": args.processes,
         "name": args.name,
         "kde_params": {"kde_kernel": args.kde_kernel,
-                       "kde_bandwidth": args.kde_bandwitdth}
+                       "kde_bandwidth": args.kde_bandwidth}
     }
     model = Glove(embedding_params=embedding_params, semcat_dir=semcat_dir,
                   eval_params=eval_params,
