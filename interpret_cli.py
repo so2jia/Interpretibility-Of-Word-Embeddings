@@ -31,7 +31,10 @@ if __name__ == '__main__':
                         help="The number of processes to initiate for calculations")
     parser.add_argument("--name", type=str, required=False, default="default",
                         help="A prefix for the output files")
-
+    parser.add_argument("--kde_kernel", type=str, required=False, default="gaussian",
+                        help="The kernel for kernel density estimation")
+    parser.add_argument("--kde_bandwidth", type=float, required=False, default=0.2,
+                        help="The bandwidth for kernel density estimation")
     # Validation
     parser.add_argument("--calculate", type=str, required=False, default="score",
                         help="[score|decomp]")
@@ -80,7 +83,9 @@ if __name__ == '__main__':
         "save_weights": save_weights,
         "load_weights": load_weights,
         "processes": args.processes,
-        "name": args.name
+        "name": args.name,
+        "kde_params": {"kde_kernel": args.kde_kernel,
+                       "kde_bandwidth": args.kde_bandwitdth}
     }
     model = Glove(embedding_params=embedding_params, semcat_dir=semcat_dir,
                   eval_params=eval_params,

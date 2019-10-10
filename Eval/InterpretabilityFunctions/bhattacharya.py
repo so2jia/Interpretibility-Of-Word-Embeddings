@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt='%d-%b-%y %H:%M:%S')
 
 
-def bhatta_distance(p: np.ndarray, q: np.ndarray):
+def bhatta_distance(p: np.ndarray, q: np.ndarray, kde_params):
     """
     Calculates Bhattacharya distance between two vectors
     Parameters
@@ -41,8 +41,8 @@ def bhatta_distance(p: np.ndarray, q: np.ndarray):
     mean1 = np.mean(p)
     mean2 = np.mean(q)
 
-    p_kde = KernelDensity(bandwidth=0.2, kernel='gaussian')
-    q_kde = KernelDensity(bandwidth=0.2, kernel='gaussian')
+    p_kde = KernelDensity(bandwidth=kde_params["kde_bandwidth"], kernel=kde_params["kde_kernel"])
+    q_kde = KernelDensity(bandwidth=kde_params["kde_bandwidth"], kernel=kde_params["kde_kernel"])
     _p = p[:, np.newaxis]
     p_kde_fit = p_kde.fit(_p)
 
@@ -66,7 +66,7 @@ def bhatta_distance(p: np.ndarray, q: np.ndarray):
 
 
 def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int,
-                        dimension_indexes: list, id: int, max_id: int):
+                        dimension_indexes: list, id: int, max_id: int, kde_params):
     """
     Calculates a slice of the Bhattacharya distance matrix
     Parameters
@@ -110,7 +110,7 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
             _q = embedding.W[~word_indexes, i]
             # calculating distance
 
-            b, s = bhatta_distance(_p, _q)
+            b, s = bhatta_distance(_p, _q, kde_params)
 
             # distance
             W_b[i][j] = b
@@ -120,7 +120,7 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
     return W_b, W_bs
 
 
-def bhattacharya_matrix(embedding: Embedding, semcat: SemCat,
+def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, kde_params:dict,
                         weights_dir="out", save_weights=False, load_weights=True,
                         processes=2, name="default"):
     """
@@ -177,7 +177,8 @@ def bhattacharya_matrix(embedding: Embedding, semcat: SemCat,
          W_b.shape[1],
          i,
          k+1,
-         len(indexes)]
+         len(indexes),
+         kde_params]
         for k, i in enumerate(indexes)
     ]
 
