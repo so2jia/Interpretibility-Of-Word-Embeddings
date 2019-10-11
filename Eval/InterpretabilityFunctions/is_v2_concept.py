@@ -9,6 +9,8 @@ import multiprocessing
 def V_p(V, embedding, n_j, lamb):
     return set([embedding.i2w[int(o)] for o in V[1, -lamb * n_j:]])
 
+def V_n(V, embedding, n_j, lamb):
+    return set([embedding.i2w[int(o)] for o in V[1, :lamb * n_j]])
 
 def is_p(i, j, es: np.ndarray, embedding: Embedding, semcat: SemCat, lamb):
     V_1 = np.array([es[:, j]])
@@ -20,10 +22,12 @@ def is_p(i, j, es: np.ndarray, embedding: Embedding, semcat: SemCat, lamb):
     n_i = semcat.vocab[semcat.i2c[i]].__len__()
 
     v_p = V_p(V_sorted, embedding, n_i, lamb)
+    v_n = V_n(V_sorted, embedding, n_i, lamb)
 
     IS_p = S.intersection(v_p).__len__() / n_i * 100
+    IS_n = S.intersection(v_n).__len__() / n_i * 100
 
-    return IS_p
+    return max(IS_p, IS_n)
 
 
 def j_star(i: int, distance_matrix: np.ndarray):
