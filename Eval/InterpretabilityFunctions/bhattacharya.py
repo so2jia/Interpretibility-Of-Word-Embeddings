@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt='%d-%b-%y %H:%M:%S')
 
 
-def bhatta_distance(p: np.ndarray, q: np.ndarray, kde_params):
+def bhatta_distance(p: np.ndarray, q: np.ndarray, mean1, p_kde_fit, kde_params):
     """
     Calculates Bhattacharya distance between two vectors
     Parameters
@@ -38,13 +38,13 @@ def bhatta_distance(p: np.ndarray, q: np.ndarray, kde_params):
         q = np.array([q])
 
     # Mean of p and q
-    mean1 = np.mean(p)
+    # mean1 = np.mean(p)
     mean2 = np.mean(q)
 
-    p_kde = KernelDensity(bandwidth=kde_params["kde_bandwidth"], kernel=kde_params["kde_kernel"])
+    # p_kde = KernelDensity(bandwidth=kde_params["kde_bandwidth"], kernel=kde_params["kde_kernel"])
     q_kde = KernelDensity(bandwidth=kde_params["kde_bandwidth"], kernel=kde_params["kde_kernel"])
-    _p = p[:, np.newaxis]
-    p_kde_fit = p_kde.fit(_p)
+    # _p = p[:, np.newaxis]
+    # p_kde_fit = p_kde.fit(_p)
 
     _q = q[:, np.newaxis]
     q_kde_fit = q_kde.fit(_q)
@@ -95,9 +95,18 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
 
     for k in tqdm.trange(dimension_indexes.__len__(), unit='dim', desc=f'__ On PID - {os.getpid()}\t'):
         i = dimension_indexes[k]
+
+        _p = embedding.W[:, i]
+
+        p_kde = KernelDensity(bandwidth=kde_params["kde_bandwidth"], kernel=kde_params["kde_kernel"])
+        p = _p[:, np.newaxis]
+        p_kde_fit = p_kde.fit(p)
+
+        mean1 = np.mean(_p)
+
         for j in tqdm.trange(category_size, desc=f'>> On PID - {os.getpid()}\t'):
             word_indexes = np.zeros(shape=[embedding.W.shape[0], ], dtype=np.bool)
-            _p = []
+
             _q = []
             # Populate P with category word weights
             for word in semcat.vocab[semcat.i2c[j]]:
@@ -105,12 +114,12 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
                     word_indexes[embedding.w2i[word]] = True
                 except KeyError:
                     continue
-            _p = embedding.W[word_indexes, i]
+
             # Populate Q with out of category word weights
             _q = embedding.W[~word_indexes, i]
             # calculating distance
 
-            b, s = bhatta_distance(_p, _q, kde_params)
+            b, s = bhatta_distance(_p, _q, mean1, p_kde_fit, kde_params)
 
             # distance
             W_b[i][j] = b
