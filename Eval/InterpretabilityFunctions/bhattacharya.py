@@ -62,7 +62,7 @@ def bhatta_distance(p: np.ndarray, q: np.ndarray, kde_params):
 
     ig = quad(g, -np.inf, np.inf, args=(p_kde_fit, q_kde_fit))
 
-    return -np.log(ig[0]), -1 if mean1 - mean2 < 0 else 1
+    return np.sqrt(1-ig[0]), -1 if mean1 - mean2 < 0 else 1
 
 
 def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int,
