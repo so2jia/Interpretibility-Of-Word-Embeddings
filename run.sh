@@ -1,0 +1,2 @@
+nice python interpret_cli.py "data/glove/glove.6B.300d.txt" "data/semcat/Categories/" -dense --lines_to_read=50000 --weights_dir="out/dense/hellinger/" -save_weights --processes=6 --name="hellinger" --calculate="score" --calculation_args 10;
+nice python interpret_cli.py "out/dense/hellinger/hellinger_I.embedding.100d.txt" "data/semcat/Categories/" -dense --lines_to_read=50000 --weights_dir="out/dense/hellinger/" -save_weights --processes=6 --name="hellinger" --calculate="score" --calculation_args 10;
