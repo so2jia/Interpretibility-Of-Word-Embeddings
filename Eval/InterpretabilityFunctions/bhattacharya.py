@@ -16,6 +16,33 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt='%d-%b-%y %H:%M:%S')
 
 
+def mlcv(x, h):
+    def K(x):
+        c = 1/np.sqrt(2*np.pi)
+        return c*np.exp(-(x**2)/2)
+
+    n=x.shape[0]
+    sm = 0
+    for i in tqdm.trange(x.shape[0]):
+        sm_j = 0
+        for j in range(x.shape[0]):
+            if i == j:
+                continue
+            sm_j += K((x[j]-x[i])/h)
+        sm += np.log(sm_j)
+    l = (1/n)*sm
+    return l-np.log(h*(n-1))
+
+
+def max_likelihood_bandwidth_estimation(x):
+    h_vals = np.arange(0.01, 1, 0.01)
+    ret_vals = []
+    for h in tqdm.tqdm(h_vals):
+        r = mlcv(x, h)
+        ret_vals.append(r)
+    return h_vals[np.array(ret_vals).argmax()]
+
+
 def bhatta_distance(p: np.ndarray, q: np.ndarray, kde_params):
     """
     Calculates Bhattacharya distance between two vectors
@@ -40,6 +67,9 @@ def bhatta_distance(p: np.ndarray, q: np.ndarray, kde_params):
     # Mean of p and q
     mean1 = np.mean(p)
     mean2 = np.mean(q)
+
+    # bandwidth_p = max_likelihood_bandwidth_estimation(p)
+    bandwidth_q = max_likelihood_bandwidth_estimation(q)
 
     p_kde = KernelDensity(bandwidth=kde_params["kde_bandwidth"], kernel=kde_params["kde_kernel"])
     q_kde = KernelDensity(bandwidth=kde_params["kde_bandwidth"], kernel=kde_params["kde_kernel"])
