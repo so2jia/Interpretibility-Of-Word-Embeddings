@@ -23,7 +23,7 @@ def mlcv(x, h):
 
     n=x.shape[0]
     sm = 0
-    for i in tqdm.trange(x.shape[0]):
+    for i in range(x.shape[0]):
         sm_j = 0
         for j in range(x.shape[0]):
             if i == j:
@@ -37,7 +37,7 @@ def mlcv(x, h):
 def max_likelihood_bandwidth_estimation(x):
     h_vals = np.arange(0.01, 1, 0.01)
     ret_vals = []
-    for h in tqdm.tqdm(h_vals):
+    for h in h_vals:
         r = mlcv(x, h)
         ret_vals.append(r)
     return h_vals[np.array(ret_vals).argmax()]
@@ -68,10 +68,9 @@ def bhatta_distance(p: np.ndarray, q: np.ndarray, kde_params):
     mean1 = np.mean(p)
     mean2 = np.mean(q)
 
-    # bandwidth_p = max_likelihood_bandwidth_estimation(p)
-    bandwidth_q = max_likelihood_bandwidth_estimation(q)
+    bandwidth_p = max_likelihood_bandwidth_estimation(p)
 
-    p_kde = KernelDensity(bandwidth=kde_params["kde_bandwidth"], kernel=kde_params["kde_kernel"])
+    p_kde = KernelDensity(bandwidth=bandwidth_p, kernel=kde_params["kde_kernel"])
     q_kde = KernelDensity(bandwidth=kde_params["kde_bandwidth"], kernel=kde_params["kde_kernel"])
     _p = p[:, np.newaxis]
     p_kde_fit = p_kde.fit(_p)
