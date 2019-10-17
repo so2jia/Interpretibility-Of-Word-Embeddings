@@ -1,0 +1,2 @@
+nice python interpret_cli.py "data/glove/glove.6B.300d.txt" "data/semcat/Categories/" -dense --lines_to_read=50000 --weights_dir="out/dense/norm/" -save_weights --processes=6 --name="norm" --calculate="score" --calculation_args 10;
+nice python interpret_cli.py "out/dense/norm/norm_I.embedding.100d.txt" "data/semcat/Categories/" -dense --lines_to_read=50000 --weights_dir="out/dense/norm/" -save_weights --processes=6 --name="norm" --calculate="score" --calculation_args 10;
