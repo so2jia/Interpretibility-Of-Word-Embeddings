@@ -2,7 +2,7 @@ from Utils.Loaders import embedding as loader
 from Utils.Loaders import semcat as sc
 from Eval.InterpretabilityFunctions.is_original import score
 from Utils.Loaders.embedding import Embedding
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, Normalizer
 
 from Eval.InterpretabilityFunctions.bhattacharya import bhattacharya_matrix
 
@@ -107,8 +107,12 @@ class Glove:
         scaler.fit(self.embedding.W)
         epsilon_s = scaler.transform(self.embedding.W)
 
+        normalizer = Normalizer()
+        normalizer.fit(self.embedding.W)
+        epsilon_normed = normalizer.transform(epsilon_s)
+
         # Calculating
-        I = epsilon_s.dot(W_nsb)
+        I = epsilon_normed.dot(W_nsb)
 
         if self.eval_params["save_weights"]:
             prefix = os.path.join(os.getcwd(), self.eval_params["weights_dir"])

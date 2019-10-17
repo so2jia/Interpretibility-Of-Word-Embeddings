@@ -6,6 +6,7 @@ import numpy as np
 from Utils.Loaders.embedding import Embedding
 from Utils.Loaders.semcat import SemCat
 from sklearn.neighbors import KernelDensity
+from sklearn.preprocessing import Normalizer
 
 from scipy.integrate import quad
 import multiprocessing
@@ -91,6 +92,10 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
     W_b = np.zeros([embedding.W.shape[1], category_size], dtype=np.float)
     W_bs = np.zeros([embedding.W.shape[1], category_size], dtype=np.int)
 
+    normalizer = Normalizer()
+    normalizer.fit(embedding.W)
+    normed = normalizer.transform(embedding.W)
+
     # TODO reduce the number of progress bars
 
     for k in tqdm.trange(dimension_indexes.__len__(), unit='dim', desc=f'__ On PID - {os.getpid()}\t'):
@@ -105,9 +110,9 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
                     word_indexes[embedding.w2i[word]] = True
                 except KeyError:
                     continue
-            _p = embedding.W[word_indexes, i]
+            _p = normed[word_indexes, i]
             # Populate Q with out of category word weights
-            _q = embedding.W[~word_indexes, i]
+            _q = normed[~word_indexes, i]
             # calculating distance
 
             b, s = bhatta_distance(_p, _q, kde_params)
