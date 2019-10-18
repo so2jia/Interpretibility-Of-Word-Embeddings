@@ -12,8 +12,13 @@ line_to_read = 50000
 python = "/home/tamas/repos/Interpretibility-Of-Word-Embeddings/venv/bin/python"
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 embedding = f"../../data/glove/glove.6B.300d.txt"
 e_s = f"../../out/kde/sparse_model/semantic/l_0.{reg}_e_s.npy"
+=======
+embedding = f"../../out/comp_semantic/comp_I.embedding.100d.txt"
+e_s = f"../../out/comp_semantic/comp_e_s.npy"
+>>>>>>> Stashed changes
 =======
 embedding = f"../../out/comp_semantic/comp_I.embedding.100d.txt"
 e_s = f"../../out/comp_semantic/comp_e_s.npy"
@@ -23,8 +28,13 @@ for m in mat:
     for n in nor:
         norm = n
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         w = f"../../out/kde/sparse_model/semantic/l_0.{reg}_{m}.npy"
         output_file = f"../../out/kde/sparse_results/semantic/l0{reg}/l_0.{reg}_{m}.png"
+=======
+        w = f"../../out/comp_semantic/comp_{m}.npy"
+        output_file = f"../../out/comp_semantic/result/comp_{m}.png"
+>>>>>>> Stashed changes
 =======
         w = f"../../out/comp_semantic/comp_{m}.npy"
         output_file = f"../../out/comp_semantic/result/comp_{m}.png"
