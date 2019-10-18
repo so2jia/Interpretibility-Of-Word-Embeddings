@@ -1,40 +1,52 @@
-import matplotlib.pyplot as plt
 import numpy as np
-from argparse import ArgumentParser
+
+from Utils.Loaders.semcat import read as semcat_reader
+from Utils.Loaders.embedding import read as embedding_reader
+import os
+from tqdm import trange
+from Eval.InterpretabilityFunctions import is_v2_concept as interpretability
+
+import logging
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    datefmt='%d-%b-%y %H:%M:%S')
+
+mpl_logger = logging.getLogger('matplotlib')
+mpl_logger.setLevel(logging.WARNING)
 
 
-def plot_interpretability_scores(input_file, output_file=None):
+def interpretability_scores(embedding_path, embedding_space, semcat_dir, distance_space, dense, lines_to_read,
+                            lamb, norm, man_space, name, output):
 
-    scores = []
-    with open(input_file, mode="r", encoding="utf8") as f:
-        for l in f.readlines():
-            scores.append(float(l))
+    path = output.split('/')
+    os_path = os.getcwd()
+    for dir in path[:-1]:
+        os_path = os.path.join(os_path, dir)
+        if not os.path.exists(os_path):
+            os.mkdir(os_path)
 
-    lamb = np.arange(len(scores))
+    embedding = embedding_reader(embedding_path, dense, lines_to_read)
+    semcat = semcat_reader(semcat_dir)
 
-    fig, ax = plt.subplots()
-    ax.plot(lamb, scores)
+    w = np.load(distance_space)
 
-    ax.set(xlabel='Lambda', ylabel='Score (%)',
-           title='Interpretability Score')
-    ax.set_xticks(lamb)
-    ax.grid()
-    if output_file is not None:
-        plt.savefig(output_file)
-    plt.show()
+    if man_space:
+        ref_matrix = np.load(embedding_space)
+    else:
+        ref_matrix = embedding.W
 
+    IS = []
 
-if __name__ == '__main__':
-    parser = ArgumentParser(description='Interpretability Score')
+    logging.info("Calculating interpretability...")
+    for i in trange(1, lamb + 1):
+        IS.append(interpretability.score(ref_matrix, embedding, semcat, w, lamb=i, norm=norm, avg=True))
 
-    parser.add_argument("input_file", type=str,
-                        help="Input file which contains the list of the scores")
-    parser.add_argument("--output_file", type=str,
-                        help="Output PNG file (Optional)")
+    # creating stats file complete path
+    pp = os.path.join(os.getcwd(), output)
+    # writing to file
+    with open(pp, mode="w", encoding="utf8") as f:
+        f.write(f"# Concept based scoring\n{name}\n# IS (Lamb [1, {lamb}]):\n")
+        for s in IS:
+            f.write(f"{s}\n")
 
-    args = parser.parse_args()
-
-    input_file = args.input_file
-    output_file = args.output_file
-
-    plot_interpretability_scores(input_file, output_file)
+    logging.info(f"IS^C for Lambda 10 is {IS[-1]}%")
