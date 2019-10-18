@@ -10,6 +10,8 @@ from sklearn.neighbors import KernelDensity
 from scipy.integrate import quad
 import multiprocessing
 
+import matplotlib.pyplot as plt
+
 import logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -40,6 +42,9 @@ def max_likelihood_bandwidth_estimation(x):
     for h in h_vals:
         r = mlcv(x, h)
         ret_vals.append(r)
+    # plt.plot(ret_vals)
+    # plt.xticks(h_vals)
+    # plt.show()
     return h_vals[np.array(ret_vals).argmax()]
 
 
