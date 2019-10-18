@@ -20,7 +20,7 @@ for m in mat:
         w = f"../../out/exponential/dense_{m}.npy"
         output_file = f"../../out/exponential/result/dense_{m}.png"
         args = [python, 'interpretability_correlation.py',
-                embedding, e_s, w, semcat, norm_type, "-dense",
+                embedding, e_s, w, semcat, norm_type,
                 "--lamb=10", f"--output_file={output_file}"]
         if n:
             args.append("-norm")
