@@ -18,6 +18,8 @@ mpl_logger.setLevel(logging.WARNING)
 def interpretability_scores(embedding_path, embedding_space, semcat_dir, distance_space, dense, lines_to_read,
                             lamb, norm, man_space, name, output):
 
+    logging.info(f"Calculating score for {name}")
+
     path = output.split('/')
     os_path = os.getcwd()
     for dir in path[:-1]:
