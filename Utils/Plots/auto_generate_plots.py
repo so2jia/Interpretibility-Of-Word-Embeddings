@@ -11,14 +11,14 @@ line_to_read = 50000
 
 python = "/home/tamas/repos/Interpretibility-Of-Word-Embeddings/venv/bin/python"
 
-embedding = f"../../data/glove/glove.6B.300d.txt"
-e_s = f"../../out/exponential/dense_e_s.npy"
+embedding = f"../../out/comp_semantic/comp_I.embedding.100d.txt"
+e_s = f"../../out/comp_semantic/comp_e_s.npy"
 
 for m in mat:
     for n in nor:
         norm = n
-        w = f"../../out/exponential/dense_{m}.npy"
-        output_file = f"../../out/exponential/result/dense_{m}.png"
+        w = f"../../out/comp_semantic/comp_{m}.npy"
+        output_file = f"../../out/comp_semantic/result/comp_{m}.png"
         args = [python, 'interpretability_correlation.py',
                 embedding, e_s, w, semcat, norm_type,
                 "--lamb=10", f"--output_file={output_file}"]
