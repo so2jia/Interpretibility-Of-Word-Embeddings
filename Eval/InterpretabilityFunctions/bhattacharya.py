@@ -25,19 +25,24 @@ def bhatta_distance(p: np.ndarray, q: np.ndarray):
     tuple
         Returns with the distance and the sign of the difference of means
     """
+
+    std_1 = np.std(p)
+    std_2 = np.std(q)
+
     # Variance of p and q
-    var1 = np.std(p) ** 2
-    var2 = np.std(q) ** 2
+    var_1 = std_1**2
+    var_2 = std_2**2
 
     # Mean of p and q
-    mean1 = np.mean(p)
-    mean2 = np.mean(q)
+    mu_1 = np.mean(p)
+    mu_2 = np.mean(q)
 
     # Formula
-    x = np.log1p((var1 / var2 + var2 / var1 + 2) / 4) / 4
-    bc = x + ((mean1 - mean2) ** 2 / (var1 + var2)) / 4
-    sign = -1 if mean1 - mean2 < 0 else 1
-    return bc, sign
+    x = -0.25*(((mu_1-mu_2)**2)/(var_1+var_2))
+    h = 1 - np.sqrt((2*std_1*std_2)/(var_1+var_2))*np.exp(x)
+
+    sign = -1 if mu_1 - mu_2 < 0 else 1
+    return np.sqrt(h), sign
 
 
 def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int,
