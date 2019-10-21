@@ -2,15 +2,20 @@ from Utils.Plots.interpretability_score import interpretability_scores
 
 
 def main():
-    paths_raw = [["comp", "comp", "Complementer"],
-                 ["exponential", "dense", "Exponential Kernel"],
-                 ["hellinger", "hellinger", "Hellinger Distance"],
-                 ["norm", "norm", "L2 Normed Space"]]
+    # ["comp", "comp", "Complementer"],
+    # paths_raw = [["comp", "comp", "Complementer"],
+    #              ["exponential", "dense", "Exponential Kernel"],
+    #              ["hellinger", "hellinger", "Hellinger Distance"],
+    #              ["norm", "norm", "L2 Normed Space"]]
+    #
+    # paths_semantic = [["comp_semantic", "comp", "Complementer Semantic"],
+    #                   ["exponential_semantic", "exp", "Exponential Kernel Semantic"],
+    #                   ["hellinger_semantic", "hellinger", "Hellinger Distance Semantic"],
+    #                   ["norm_semantic", "norm", "L2 Normed Space Semantic"]]
 
-    paths_semantic = [["comp_semantic", "comp", "Complementer Semantic"],
-                      ["exponential_semantic", "exp", "Exponential Kernel Semantic"],
-                      ["hellinger_semantic", "hellinger", "Hellinger Distance Semantic"],
-                      ["norm_semantic", "norm", "L2 Normed Space Semantic"]]
+    paths_raw = [["bandwidth", "bw", "Bandwidth Estimation"]]
+
+    paths_semantic = [["bandwidth_semantic", "bw", "bandwidth Estimation Semantic"]]
 
     for path in paths_raw:
         folder = path[0]
@@ -33,7 +38,7 @@ def main():
                     "norm": n,
                     "man_space": False,
                     "name": path[2],
-                    "output": f"../../out/{folder}/{w}_stats{'-norm' if n else ''}.txt"
+                    "output": f"../../out/{folder}/results/{w}_stats{'-norm' if n else ''}.txt"
                 }
                 interpretability_scores(**params)
 
@@ -59,7 +64,7 @@ def main():
                     "norm": n,
                     "man_space": False,
                     "name": path[2],
-                    "output": f"../../out/{folder}/{w}_stats{'-norm' if n else ''}.txt"
+                    "output": f"../../out/{folder}/results/{w}_stats{'-norm' if n else ''}.txt"
                 }
                 interpretability_scores(**params)
 
