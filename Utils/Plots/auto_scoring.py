@@ -6,16 +6,18 @@ def main():
     # paths_raw = [["comp", "comp", "Complementer"],
     #              ["exponential", "dense", "Exponential Kernel"],
     #              ["hellinger", "hellinger", "Hellinger Distance"],
-    #              ["norm", "norm", "L2 Normed Space"]]
+    #              ["norm", "norm", "L2 Normed Space"],
+    #              ["bandwidth", "bw", "Bandwidth Estimation"]]
     #
     # paths_semantic = [["comp_semantic", "comp", "Complementer Semantic"],
     #                   ["exponential_semantic", "exp", "Exponential Kernel Semantic"],
     #                   ["hellinger_semantic", "hellinger", "Hellinger Distance Semantic"],
-    #                   ["norm_semantic", "norm", "L2 Normed Space Semantic"]]
+    #                   ["norm_semantic", "norm", "L2 Normed Space Semantic"],
+    #                   ["bandwidth_semantic", "bw", "bandwidth Estimation Semantic"]]
 
-    paths_raw = [["bandwidth", "bw", "Bandwidth Estimation"]]
+    paths_raw = [["gauss", "glove.6B.300d", "Gauss Kernel KDE"]]
 
-    paths_semantic = [["bandwidth_semantic", "bw", "bandwidth Estimation Semantic"]]
+    paths_semantic = [["gauss_semantic", "glove.6B.300d", "Gauss Kernel Semantic"]]
 
     for path in paths_raw:
         folder = path[0]

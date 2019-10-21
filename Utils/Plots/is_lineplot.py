@@ -11,13 +11,15 @@ paths = [["comp", "comp", "Complementer"],
              ["hellinger", "hellinger", "Hellinger Distance"],
              ["hellinger_semantic", "hellinger", "Hellinger Distance Semantic"],
              ["norm", "norm", "L2 Normed Space"],
-             ["norm_semantic", "norm", "L2 Normed Space Semantic"]]
+             ["norm_semantic", "norm", "L2 Normed Space Semantic"],
+             ["bandwidth", "norm", "Bandwidth Estimation"],
+             ["bandwidth_semantic", "norm", "Bandwidth Estimation Semantic"]]
 
 plot_index = 0
 
 fig, axes = plt.subplots(paths.__len__()//2, 2, sharey=True, sharex=True)
 fig.suptitle("Interpretibility")
-fig.set_size_inches(8, 16)
+fig.set_size_inches(9, 18)
 
 for path in paths:
 
