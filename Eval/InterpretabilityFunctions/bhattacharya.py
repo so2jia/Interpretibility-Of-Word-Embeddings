@@ -38,13 +38,13 @@ def bhatta_distance(p: np.ndarray, q: np.ndarray, mean1, p_kde_fit, kde_params):
         q = np.array([q])
 
     # Mean of p and q
-    # mean1 = np.mean(p)
+    mean1 = np.mean(p)
     mean2 = np.mean(q)
 
-    # p_kde = KernelDensity(bandwidth=kde_params["kde_bandwidth"], kernel=kde_params["kde_kernel"])
+    p_kde = KernelDensity(bandwidth=kde_params["kde_bandwidth"], kernel=kde_params["kde_kernel"])
     q_kde = KernelDensity(bandwidth=kde_params["kde_bandwidth"], kernel=kde_params["kde_kernel"])
-    # _p = p[:, np.newaxis]
-    # p_kde_fit = p_kde.fit(_p)
+    _p = p[:, np.newaxis]
+    p_kde_fit = p_kde.fit(_p)
 
     _q = q[:, np.newaxis]
     q_kde_fit = q_kde.fit(_q)
