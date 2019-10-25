@@ -10,13 +10,16 @@ from sklearn.neighbors import KernelDensity
 from scipy.integrate import quad
 import multiprocessing
 
+from scipy.stats import norm
+import matplotlib.pyplot as plt
+
 import logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s',
                     datefmt='%d-%b-%y %H:%M:%S')
 
 
-def bhatta_distance(p: np.ndarray, q: np.ndarray, mean1, p_kde_fit, kde_params):
+def bhatta_distance(p: np.ndarray, q: np.ndarray, kde_params):
     """
     Calculates Bhattacharya distance between two vectors
     Parameters
@@ -98,12 +101,6 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
 
         _p = embedding.W[:, i]
 
-        p_kde = KernelDensity(bandwidth=kde_params["kde_bandwidth"], kernel=kde_params["kde_kernel"])
-        p = _p[:, np.newaxis]
-        p_kde_fit = p_kde.fit(p)
-
-        mean1 = np.mean(_p)
-
         for j in tqdm.trange(category_size, desc=f'>> On PID - {os.getpid()}\t'):
             word_indexes = np.zeros(shape=[embedding.W.shape[0], ], dtype=np.bool)
 
@@ -119,7 +116,7 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
             _q = embedding.W[~word_indexes, i]
             # calculating distance
 
-            b, s = bhatta_distance(_p, _q, mean1, p_kde_fit, kde_params)
+            b, s = bhatta_distance(_p, _q, kde_params)
 
             # distance
             W_b[i][j] = b
