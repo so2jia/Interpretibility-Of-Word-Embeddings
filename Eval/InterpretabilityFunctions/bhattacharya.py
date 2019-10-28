@@ -10,9 +10,6 @@ from sklearn.neighbors import KernelDensity
 from scipy.integrate import quad
 import multiprocessing
 
-from scipy.stats import norm
-import matplotlib.pyplot as plt
-
 import logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s',
