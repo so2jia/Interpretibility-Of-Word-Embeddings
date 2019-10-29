@@ -83,7 +83,8 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
         The number of the slice (logging)
     max_id
         The number of the slices (logging)
-
+    kde_params: dict
+        Parameters for Kernel Density Estimation contains 2 key "kde_kernel" and "kde_bandwidth"
     Returns
     -------
 
@@ -91,32 +92,33 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
     W_b = np.zeros([embedding.W.shape[1], category_size], dtype=np.float)
     W_bs = np.zeros([embedding.W.shape[1], category_size], dtype=np.int)
 
-    # TODO reduce the number of progress bars
-
     for k in tqdm.trange(dimension_indexes.__len__(), unit='dim', desc=f'__ On PID - {os.getpid()}\t'):
         i = dimension_indexes[k]
 
         for j in tqdm.trange(category_size, desc=f'>> On PID - {os.getpid()}\t'):
             word_indexes = np.zeros(shape=[embedding.W.shape[0], ], dtype=np.bool)
 
-            _p = []
-            _q = []
-            # Populate P with category word weights
+            # One-hot selection vector for in-category words
             for word in semcat.vocab[semcat.i2c[j]]:
                 try:
                     word_indexes[embedding.w2i[word]] = True
                 except KeyError:
                     continue
 
+            _p = []
+            _q = []
+
+            # Populate P with category word weights
             _p = embedding.W[word_indexes, i]
             # Populate Q with out of category word weights
             _q = embedding.W[~word_indexes, i]
-            # calculating distance
 
+            # calculating distance
             b, s = bhatta_distance(_p, _q, kde_params)
 
             # distance
             W_b[i][j] = b
+            # sign
             W_bs[i][j] = s
 
     logging.info(f"Bhattacharya matrix: slice #{id}/{max_id} calculated...")
