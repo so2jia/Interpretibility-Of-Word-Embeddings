@@ -96,11 +96,10 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
     for k in tqdm.trange(dimension_indexes.__len__(), unit='dim', desc=f'__ On PID - {os.getpid()}\t'):
         i = dimension_indexes[k]
 
-        _p = embedding.W[:, i]
-
         for j in tqdm.trange(category_size, desc=f'>> On PID - {os.getpid()}\t'):
             word_indexes = np.zeros(shape=[embedding.W.shape[0], ], dtype=np.bool)
 
+            _p = []
             _q = []
             # Populate P with category word weights
             for word in semcat.vocab[semcat.i2c[j]]:
@@ -109,6 +108,7 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
                 except KeyError:
                     continue
 
+            _p = embedding.W[word_indexes, i]
             # Populate Q with out of category word weights
             _q = embedding.W[~word_indexes, i]
             # calculating distance
