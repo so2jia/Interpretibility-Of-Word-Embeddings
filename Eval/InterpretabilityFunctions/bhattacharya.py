@@ -125,7 +125,7 @@ def calculation_process(embedding: Embedding, semcat: SemCat, category_size: int
     return W_b, W_bs
 
 
-def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, kde_params:dict,
+def bhattacharya_matrix(embedding: Embedding, semcat: SemCat, kde_params: dict,
                         weights_dir="out", save_weights=False, load_weights=True,
                         processes=2, name="default"):
     """

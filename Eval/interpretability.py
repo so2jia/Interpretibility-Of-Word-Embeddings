@@ -2,7 +2,7 @@ from Utils.Loaders import embedding as loader
 from Utils.Loaders import semcat as sc
 from Eval.InterpretabilityFunctions.is_original import score
 from Utils.Loaders.embedding import Embedding
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, Normalizer
 
 from Eval.InterpretabilityFunctions.bhattacharya import bhattacharya_matrix
 
@@ -96,7 +96,7 @@ class Glove:
 
         # Normalized matrix
         logging.info("Normalizing Bhattacharya matrix...")
-        W_nb = W_b / np.linalg.norm(W_b, 1, axis=0)
+        W_nb = Normalizer('l1').transform(W_b.T).T
 
         # Sign correction
         W_nsb = W_nb * W_bs
