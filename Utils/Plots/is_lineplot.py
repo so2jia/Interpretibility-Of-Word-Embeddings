@@ -4,22 +4,18 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-paths = [["comp", "comp", "Complementer"],
-             ["comp_semantic", "comp", "Complementer Semantic"],
-             ["exponential", "dense", "Exponential Kernel"],
-             ["exponential_semantic", "exp", "Exponential Kernel Semantic"],
-             ["hellinger", "hellinger", "Hellinger Distance"],
-             ["hellinger_semantic", "hellinger", "Hellinger Distance Semantic"],
-             ["norm", "norm", "L2 Normed Space"],
-             ["norm_semantic", "norm", "L2 Normed Space Semantic"],
-             ["bandwidth", "norm", "Bandwidth Estimation"],
-             ["bandwidth_semantic", "norm", "Bandwidth Estimation Semantic"]]
+paths = [["gauss/kernel_02", "02", "Gauss Kernel 0.2 KDE"],
+         ["gauss/kernel_02", "s02", "Gauss Kernel 0.2 Semantic"],
+         ["original", "", "Closed Bhattacharyya"],
+         ["original_semantic", "", "Closed Bhattacharyya Semantic"]]
 
 plot_index = 0
 
 fig, axes = plt.subplots(paths.__len__()//2, 2, sharey=True, sharex=True)
 fig.suptitle("Interpretibility")
-fig.set_size_inches(9, 18)
+fig.set_size_inches(7, 7)
+
+semspace = False
 
 for path in paths:
 
@@ -40,7 +36,10 @@ for path in paths:
     values = {}
     # Dense
     for file in files:
-        p = os.path.join(base_path, file[0])
+        if semspace:
+            p = os.path.join(base_path, "semantic_"+file[0])
+        else:
+            p = os.path.join(base_path, file[0])
         with open(p, mode="r", encoding="utf8") as f:
             values[file[1]] = np.array(f.readlines()[3:], dtype=np.float)
 
@@ -54,6 +53,8 @@ for path in paths:
     ax.set_title(path[2])
 
     plot_index += 1
+
+    semspace = ~semspace
 
 plt.xticks(np.arange(1, 11, 1))
 plt.xlim([1, 10])

@@ -15,9 +15,9 @@ def main():
     #                   ["norm_semantic", "norm", "L2 Normed Space Semantic"],
     #                   ["bandwidth_semantic", "bw", "bandwidth Estimation Semantic"]]
 
-    paths_raw = [["gauss", "glove.6B.300d", "Gauss Kernel KDE"]]
+    paths_raw = [["gauss/kernel_02", "02", "Gauss Kernel 0.2 KDE"]]
 
-    paths_semantic = [["gauss_semantic", "glove.6B.300d", "Gauss Kernel Semantic"]]
+    paths_semantic = [["gauss/kernel_02", "s02", "Gauss Kernel 0.2 Semantic"]]
 
     for path in paths_raw:
         folder = path[0]
@@ -44,12 +44,11 @@ def main():
                 }
                 interpretability_scores(**params)
 
-
-    for path in paths_semantic:
+    for key, path in enumerate(paths_semantic):
         folder = path[0]
         prefix = path[1]
 
-        custom_space = f"../../out/{folder}/{prefix}_I.embedding.100d.txt"
+        custom_space = f"../../out/{paths_raw[key][0]}/{paths_raw[key][1]}_I.embedding.100d.txt"
 
         norm = [True, False]
         ws = ["w_b", "w_nb", "w_nsb"]
@@ -66,7 +65,7 @@ def main():
                     "norm": n,
                     "man_space": False,
                     "name": path[2],
-                    "output": f"../../out/{folder}/results/{w}_stats{'-norm' if n else ''}.txt"
+                    "output": f"../../out/{folder}/results/semantic_{w}_stats{'-norm' if n else ''}.txt"
                 }
                 interpretability_scores(**params)
 
