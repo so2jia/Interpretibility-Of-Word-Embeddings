@@ -1,5 +1,7 @@
 import os
 import logging
+import random
+import math
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -49,7 +51,7 @@ class SemCat:
         return self._i2c
 
 
-def read(input_dir: str):
+def read(input_dir: str, params=None):
     """
     Reads in SEMCAT categories and words
 
@@ -63,6 +65,11 @@ def read(input_dir: str):
     SemCat:
         Wrapper
     """
+    if params is None:
+        params = {"random": False,
+                  "seed": None,
+                  "percent": 0}
+
     vocab = {}
     vocab_size = 0
 
@@ -79,6 +86,19 @@ def read(input_dir: str):
                 w2i[category_name] = id
                 vocab[category_name] = words
                 id += 1
+
+    random.seed(params["seed"])
+    percent = params["percent"]
+    rng_dropout = params["random"]
+
+    if rng_dropout:
+        for c in vocab:
+            size = vocab[c].__len__()
+            rm_num = math.ceil(size*percent)
+            vocab_size -= rm_num
+            for i in range(rm_num):
+                rng = random.randint(0, size-i-1)
+                del vocab[c][rng]
 
     i2w = {v: k for k, v in w2i.items()}
 

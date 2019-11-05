@@ -67,7 +67,9 @@ class Glove:
 
         # Reading files
         self.embedding = loader.read(**embedding_params)
-        self.semcat = sc.read(semcat_dir)
+        self.semcat = sc.read(semcat_dir, eval_params["semcat_random"])
+
+        del eval_params["semcat_random"]
 
         self.eval_params = eval_params
         self.eval_params["embedding"] = self.embedding

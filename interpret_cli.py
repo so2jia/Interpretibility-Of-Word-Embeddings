@@ -35,6 +35,14 @@ if __name__ == '__main__':
                         help="The kernel for kernel density estimation")
     parser.add_argument("--kde_bandwidth", type=float, required=False, default=0.2,
                         help="The bandwidth for kernel density estimation")
+    # RNG based dropout
+    parser.add_argument("-random_drop", action="store_true", required=False,
+                        help="Flag whether you want to drop random words from categories")
+    parser.add_argument("--random_seed", type=int, required=False, default=None,
+                        help="Seed to random number generation (Default: None)")
+    parser.add_argument("--percent", type=float, required=False, default=0.1,
+                        help="Percentage of the words to drop out [0, 1] (Default: 0.1)")
+
     # Validation
     parser.add_argument("--calculate", type=str, required=False, default="score",
                         help="[score|decomp]")
@@ -85,7 +93,10 @@ if __name__ == '__main__':
         "processes": args.processes,
         "name": args.name,
         "kde_params": {"kde_kernel": args.kde_kernel,
-                       "kde_bandwidth": args.kde_bandwidth}
+                       "kde_bandwidth": args.kde_bandwidth},
+        "semcat_random": {"random": args.random_drop,
+                          "seed": args.random_seed,
+                          "percent": args.percent}
     }
     model = Glove(embedding_params=embedding_params, semcat_dir=semcat_dir,
                   eval_params=eval_params,

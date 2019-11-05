@@ -4,6 +4,7 @@ from Utils.Loaders.semcat import read as semcat_reader
 from Utils.Loaders.embedding import read as embedding_reader
 import os
 from tqdm import trange
+import tqdm
 from Eval.InterpretabilityFunctions import is_v2_concept as interpretability
 
 import logging
@@ -40,7 +41,7 @@ def interpretability_scores(embedding_path, embedding_space, semcat_dir, distanc
     IS = []
 
     logging.info("Calculating interpretability...")
-    for i in trange(1, lamb + 1):
+    for i in tqdm.tqdm([1, 5, 10]):
         IS.append(interpretability.score(ref_matrix, embedding, semcat, w, lamb=i, norm=norm, avg=True))
 
     # creating stats file complete path
