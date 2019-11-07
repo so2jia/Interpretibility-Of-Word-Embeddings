@@ -12,10 +12,11 @@ class SemCat:
     """
     Wraps vocab and converter dictionaries
     """
-    def __init__(self, vocab, c2i, i2c):
+    def __init__(self, vocab, c2i, i2c, dw):
         self._vocab = vocab
         self._c2i = c2i
         self._i2c = i2c
+        self._dropped_words = dw
 
     @property
     def vocab(self):
@@ -49,6 +50,16 @@ class SemCat:
             key -> value
         """
         return self._i2c
+
+    @property
+    def dropped_words(self):
+        """
+        Randomly dropped words
+        Returns
+        -------
+            key -> [list]
+        """
+        return self._dropped_words
 
 
 def read(input_dir: str, params=None):
@@ -91,17 +102,22 @@ def read(input_dir: str, params=None):
     percent = params["percent"]
     rng_dropout = params["random"]
 
+    dropped_words = {}
+
     if rng_dropout:
         for c in vocab:
+            if c not in dropped_words:
+                dropped_words[c] = []
             size = vocab[c].__len__()
             rm_num = math.ceil(size*percent)
             vocab_size -= rm_num
             for i in range(rm_num):
                 rng = random.randint(0, size-i-1)
+                dropped_words[c].append(vocab[c][rng])
                 del vocab[c][rng]
 
     i2w = {v: k for k, v in w2i.items()}
 
     logging.info(
         f"{vocab.__len__()} categories are read from SEMCAT files, which contain overall {vocab_size} words.")
-    return SemCat(vocab, w2i, i2w)
+    return SemCat(vocab, w2i, i2w, dropped_words)
