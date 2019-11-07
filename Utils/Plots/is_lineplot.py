@@ -4,24 +4,25 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-paths = [["gauss/kernel_01", "01", "Gauss Kernel 0.1 KDE"],
-         ["gauss/kernel_01", "s01", "Gauss Kernel 0.1 KDE Semantic"],
-         ["gauss/kernel_02", "02", "Gauss Kernel 0.2 KDE"],
-         ["gauss/kernel_02", "s02", "Gauss Kernel 0.2 KDE Semantic"],
-         ["gauss/kernel_05", "05", "Gauss Kernel 0.5 KDE"],
-         ["gauss/kernel_05", "s05", "Gauss Kernel 0.5 KDE Semantic"],
-         ["gauss/kernel_1", "1", "Gauss Kernel 1.0 KDE"],
-         ["gauss/kernel_1", "s1", "Gauss Kernel 1.0 KDE Semantic"],
-         ["gauss/hellinger", "h", "Hellinger Distance Kernel 0.2"],
-         ["gauss/hellinger", "sh", "Hellinger Distance Kernel 0.2 Semantic"],
-         ["original", "o", "Closed Bhattacharyya Distance"],
-         ["original", "so", "Closed Bhattacharyya Distance Semantic"]]
+paths = [["rng/gauss/kernel_01", "01", "Gauss Kernel 0.1 KDE"],
+         ["rng/gauss/kernel_01", "s01", "Gauss Kernel 0.1 KDE Semantic"],
+         ["rng/gauss/kernel_02", "02", "Gauss Kernel 0.2 KDE"],
+         ["rng/gauss/kernel_02", "s02", "Gauss Kernel 0.2 KDE Semantic"],
+         ["rng/gauss/kernel_05", "05", "Gauss Kernel 0.5 KDE"],
+         ["rng/gauss/kernel_05", "s05", "Gauss Kernel 0.5 KDE Semantic"],
+         ["rng/gauss/kernel_1", "1", "Gauss Kernel 1.0 KDE"],
+         ["rng/gauss/kernel_1", "s1", "Gauss Kernel 1.0 KDE Semantic"],
+         # ["gauss/hellinger", "h", "Hellinger Distance Kernel 0.2"],
+         # ["gauss/hellinger", "sh", "Hellinger Distance Kernel 0.2 Semantic"],
+         # ["original", "o", "Closed Bhattacharyya Distance"],
+         # ["original", "so", "Closed Bhattacharyya Distance Semantic"]
+         ]
 
 plot_index = 0
 
 fig, axes = plt.subplots(paths.__len__()//2, 2, sharey=True, sharex=True)
 fig.suptitle("Interpretibility")
-fig.set_size_inches(8, 18)
+fig.set_size_inches(8, 15)
 
 semspace = False
 

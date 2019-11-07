@@ -17,7 +17,7 @@ mpl_logger.setLevel(logging.WARNING)
 
 
 def interpretability_scores(embedding_path, embedding_space, semcat_dir, distance_space, dense, lines_to_read,
-                            lamb, norm, man_space, name, output):
+                            lamb, norm, man_space, name, output, validation, random, seed, percent):
 
     logging.info(f"Calculating score for {name}")
 
@@ -29,7 +29,11 @@ def interpretability_scores(embedding_path, embedding_space, semcat_dir, distanc
             os.mkdir(os_path)
 
     embedding = embedding_reader(embedding_path, dense, lines_to_read)
-    semcat = semcat_reader(semcat_dir)
+    semcat = semcat_reader(semcat_dir, params={
+        "random": random,
+        "seed": seed,
+        "percent": percent
+    })
 
     w = np.load(distance_space)
 
@@ -42,7 +46,8 @@ def interpretability_scores(embedding_path, embedding_space, semcat_dir, distanc
 
     logging.info("Calculating interpretability...")
     for i in tqdm.tqdm([1, 5, 10]):
-        IS.append(interpretability.score(ref_matrix, embedding, semcat, w, lamb=i, norm=norm, avg=True))
+        IS.append(interpretability.score(ref_matrix, embedding, semcat, w, lamb=i, norm=norm, avg=True,
+                                         validation=validation))
 
     # creating stats file complete path
     pp = os.path.join(os.getcwd(), output)

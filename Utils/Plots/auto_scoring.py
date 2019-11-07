@@ -15,21 +15,29 @@ def main():
     #                   ["norm_semantic", "norm", "L2 Normed Space Semantic"],
     #                   ["bandwidth_semantic", "bw", "bandwidth Estimation Semantic"]]
 
-    paths_raw = [["gauss/kernel_01", "01", "Gauss Kernel 0.1 KDE"],
-                 ["gauss/kernel_02", "02", "Gauss Kernel 0.2 KDE"],
-                 ["gauss/kernel_05", "05", "Gauss Kernel 0.5 KDE"],
-                 ["gauss/kernel_1", "1", "Gauss Kernel 1.0 KDE"],
-                 ["gauss/hellinger", "h", "Hellinger Distance Kernel 0.2"],
-                 ["original", "o", "Closed Bhattacharyya Distance"]]
+    paths_raw = [#["rng/gauss/kernel_01", "01", "Gauss Kernel 0.1 KDE"],
+                 ["rng/gauss/kernel_02", "02", "Gauss Kernel 0.2 KDE"],
+                 #["rng/gauss/kernel_05", "05", "Gauss Kernel 0.5 KDE"],
+                 #["rng/gauss/kernel_1", "1", "Gauss Kernel 1.0 KDE"],
+                 # ["rng/gauss/hellinger", "h", "Hellinger Distance Kernel 0.2"],
+                 # ["original", "o", "Closed Bhattacharyya Distance"]
+                 ]
 
-    paths_semantic = [["gauss/kernel_01", "s01", "Gauss Kernel 0.1 Semantic"],
+    paths_semantic = [#["rng/gauss/kernel_01", "s01", "Gauss Kernel 0.1 Semantic"],
                       ["gauss/kernel_02", "s02", "Gauss Kernel 0.2 Semantic"],
-                      ["gauss/kernel_05", "s05", "Gauss Kernel 0.5 Semantic"],
-                      ["gauss/kernel_1", "s1", "Gauss Kernel 1.0 Semantic"],
-                      ["gauss/hellinger", "sh", "Hellinger Distance Kernel 0.2 Semantic"],
-                      ["original", "so", "Closed Bhattacharyya Distance Semantic"]]
+                      #["rng/gauss/kernel_05", "s05", "Gauss Kernel 0.5 Semantic"],
+                      #["rng/gauss/kernel_1", "s1", "Gauss Kernel 1.0 Semantic"],
+                      # ["rng/gauss/hellinger", "sh", "Hellinger Distance Kernel 0.2 Semantic"],
+                      # ["original", "so", "Closed Bhattacharyya Distance Semantic"]
+                      ]
+
+    random = False
+    seed = 420
+    percent = 0.4
+    validation = False
 
     for path in paths_raw:
+        break
         folder = path[0]
         prefix = path[1]
 
@@ -50,7 +58,11 @@ def main():
             "norm": False,
             "man_space": False,
             "name": path[2],
-            "output": f"../../out/{folder}/results/{w}_stats{'-norm' if False else ''}.txt"
+            "output": f"../../out/{folder}/results/{w}_stats{'-norm' if False else ''}.txt",
+            "random": random,
+            "seed": seed,
+            "percent": percent,
+            "validation": validation
         }
         interpretability_scores(**params)
 
@@ -75,7 +87,11 @@ def main():
             "norm": n,
             "man_space": False,
             "name": path[2],
-            "output": f"../../out/{folder}/results/semantic_{w}_stats{'-norm' if n else ''}.txt"
+            "output": f"../../out/{folder}/results/semantic_{w}_stats{'-norm' if n else ''}.txt",
+            "random": random,
+            "seed": seed,
+            "percent": percent,
+            "validation": validation
         }
         interpretability_scores(**params)
 
