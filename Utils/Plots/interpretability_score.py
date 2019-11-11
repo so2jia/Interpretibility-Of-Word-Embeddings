@@ -37,10 +37,7 @@ def interpretability_scores(embedding_path, semcat_dir, distance_space, dense, l
 
     w = np.load(distance_space)
 
-    if man_space:
-        ref_matrix = np.load(embedding_space)
-    else:
-        ref_matrix = embedding.W
+    ref_matrix = embedding.W
 
     IS = []
 
