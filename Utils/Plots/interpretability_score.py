@@ -16,8 +16,8 @@ mpl_logger = logging.getLogger('matplotlib')
 mpl_logger.setLevel(logging.WARNING)
 
 
-def interpretability_scores(embedding_path, embedding_space, semcat_dir, distance_space, dense, lines_to_read,
-                            lamb, norm, man_space, name, output, validation, random, seed, percent):
+def interpretability_scores(embedding_path, semcat_dir, distance_space, dense, lines_to_read,
+                            lamb, norm, name, output, validation, random, seed, percent):
 
     logging.info(f"Calculating score for {name}")
 

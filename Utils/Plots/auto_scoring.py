@@ -49,14 +49,12 @@ def main():
         w = ws[0]
         params = {
             "embedding_path": glove,
-            "embedding_space": f"../../out/{folder}/{prefix}_e_s.npy",
             "semcat_dir": "../../data/semcat/Categories/",
             "distance_space": f"../../out/{folder}/{prefix}_{w}.npy",
             "dense": True,
             "lines_to_read": 50000,
             "lamb": 10,
             "norm": False,
-            "man_space": False,
             "name": path[2],
             "output": f"../../out/{folder}/results/{w}_stats{'-norm' if False else ''}.txt",
             "random": random,
@@ -78,14 +76,12 @@ def main():
         w = ws[0]
         params = {
             "embedding_path": custom_space,
-            "embedding_space": f"../../out/{folder}/{prefix}_e_s.npy",
             "semcat_dir": "../../data/semcat/Categories/",
             "distance_space": f"../../out/{folder}/{prefix}_{w}.npy",
             "dense": True,
             "lines_to_read": 50000,
             "lamb": 10,
             "norm": n,
-            "man_space": False,
             "name": path[2],
             "output": f"../../out/{folder}/results/semantic_{w}_stats{'-norm' if n else ''}.txt",
             "random": random,
